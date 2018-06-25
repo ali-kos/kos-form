@@ -28,5 +28,7 @@ export const fieldDisplayMiddleware = async (dispatch, getState, action) => {
       type: 'setState',
       payload: createDisplayPayload(payload, getState, result),
     });
+
+    return result;
   }
 }

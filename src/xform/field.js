@@ -40,8 +40,6 @@ export default ({ FieldWrapper, FieldProps }) => {
       fieldProps.style = fieldProps.style || {};
       fieldProps.style.display = this.getDisplay(field);
 
-      console.log(fieldProps);
-
       return (<FieldWrapper
         {...fieldProps}
         {...validateData}

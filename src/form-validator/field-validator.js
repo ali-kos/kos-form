@@ -1,40 +1,5 @@
 import { parseValidatorRules, runRule } from './validator-rule';
-
-/**
- *
- * @param {Object} validator 校验器
- * @param {Object} payload 参数
- * @param {Object} state 当前namespace下的Model
- */
-// const runValidator = async (validator, payload, getState) => {
-//   const {
-//     fn, help, data,
-//   } = validator;
-//   const { field, value, formName } = payload;
-
-//   const result = await fn(getState, { value, field, formName }, data);
-
-//   let validateStatus = 'success';
-//   let runnerHelp = '';
-//   if ($.isBoolean(result)) {
-//     validateStatus = result ? 'success' : 'error';
-//   } else if ($.isString(result)) { // 返回的是错误消息
-//     runnerHelp = result;
-//     if (result) {
-//       validateStatus = result ? 'error' : 'success';
-//     }
-//   } else if ($.isObject(result)) {
-//     return result;
-//   }
-
-//   const fieldResult = {
-//     validateStatus,
-//     hasFeedback: true,
-//     help: runnerHelp || getValidateHelp(help, validateStatus, data),
-//   };
-
-//   return fieldResult;
-// };
+import { getFieldDisplayData } from '../data-util';
 
 class FieldValidator {
   constructor(field, validators) {
@@ -57,13 +22,19 @@ class FieldValidator {
   setEnable() {
     this.disabled = false;
   }
+  isDisable(state, formName, field) {
+    return getFieldDisplayData(state, formName, field);
+  }
   async run(payload, getState) {
-    let validateResult = null;
-
-    if (this.disabled) {
-      return null;
+    // TODO：如果表单为隐藏的，则不执行校验器，这部分逻辑有耦合
+    const { formName, field } = payload;
+    const state = getState();
+    const disable = this.isDisable(state, formName, field);
+    if (disable === false) {
+      return validateResult;
     }
 
+    let validateResult = null;
     const { list } = this;
     for (let i = 0, len = list.length; i < len; i++) {
       const validator = list[i];

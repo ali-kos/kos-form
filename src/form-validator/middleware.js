@@ -48,6 +48,8 @@ export const fieldValidateMiddleware = async (dispatch, getState, action) => {
       type: 'setState',
       payload: createValidatePayload(payload, getState, fieldResult),
     });
+
+    return fieldResult;
   }
 }
 
