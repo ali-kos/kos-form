@@ -1,0 +1,43 @@
+{
+  "name": "kos-form",
+  "version": "0.1.0",
+  "description": "基于kos-core的表单可使用封装",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ali-kos/kos"
+  },
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "rm -rf lib && rollup -c",
+    "pub": "npm run build && npm publish && rm -rf lib"
+  },
+  "main": "lib/index.js",
+  "module": "index.js",
+  "dependencies": {
+    "kos-core": "^0.1.4",
+    "prop-types": "^15.6.1",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "react-redux": "^5.0.7",
+    "redux": "3",
+    "lodash": "^4.17.5"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-plugin-transform-async-to-generator": "^6.24.1",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-es2015-spread": "^6.22.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-import": "^2.10.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.7.0",
+    "rollup": "^0.57.1",
+    "rollup-plugin-babel": "^3.0.3"
+  }
+}
