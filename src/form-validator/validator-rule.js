@@ -26,18 +26,36 @@ import { getValidateHelp } from './validator-help';
  */
 
 const RuleParseUtil = {
-  stringParser(validator) {
-    const [name, data] = validator.split(':');
-    const v = {
-      ...getRule(name)
-    };
-
-    // 转换成数组
-    if (data) {
-      v.data = data.split(',');
+  /**
+   * 解析stringRule
+   * @param {String} rule 规则，如：maxLength:2@最大长度不能超过{0};minLength min:1;rangeLength:1,2
+   */
+  stringParser(rule) {
+    if (!rule) {
+      return [];
     }
+    rule = rule.split(';');
+    const list = [];
 
-    return v;
+    rule.forEach(item => {
+      const [express, help] = item.split('@');
+      const [name, data] = express.split(':');
+      const v = {
+        ...getRule(name)
+      };
+
+      // 转换成数组
+      if (data) {
+        v.data = data.split(',');
+      }
+      if (help) {
+        v.help = help;
+      }
+
+      list.push(v);
+    });
+
+    return list;
   },
   functionParser(validator) {
     return {
@@ -68,16 +86,16 @@ const RuleParseUtil = {
   }
 }
 
-export const parseRule = (validator, custHelp) => {
+export const parseRule = (rule, custHelp) => {
   let v = null;
-  if ($.isString(validator)) {
-    v = RuleParseUtil.stringParser(validator);
-  } else if ($.isFunction(validator)) {
-    v = RuleParseUtil.functionParser(validator);
-  } else if ($.isRegExp(validator)) {
-    v = RuleParseUtil.regexpParser(validator);
-  } else if ($.isObject(validator)) {
-    v = RuleParseUtil.objectParser(validator);
+  if ($.isString(rule)) {
+    v = RuleParseUtil.stringParser(rule);
+  } else if ($.isFunction(rule)) {
+    v = RuleParseUtil.functionParser(rule);
+  } else if ($.isRegExp(rule)) {
+    v = RuleParseUtil.regexpParser(rule);
+  } else if ($.isObject(rule)) {
+    v = RuleParseUtil.objectParser(rule);
   }
 
   if (v && custHelp !== undefined) {
@@ -89,11 +107,11 @@ export const parseRule = (validator, custHelp) => {
 
 export const parseValidatorRules = (validatorItem) => {
   const { field, help } = validatorItem;
-  const list = [];
+  let list = [];
   const rules = [].concat(validatorItem.rules);
 
   rules.forEach(ruleItem => {
-    ruleItem && list.push(parseRule(ruleItem, help));
+    list = list.concat(parseRule(ruleItem, help));
   });
 
   return list;
