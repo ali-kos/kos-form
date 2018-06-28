@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { getFieldValidateData, getFieldDisplayData, getFormValidateData } from '../data-util';
+import { getFieldValidateData, getFieldDisplayData, getFormValidateData, createFormDataPayload } from '../data-util';
 
 import { XFORM_FIELD_CHANGE, XFORM_VALIDATE } from '../const';
 
@@ -12,14 +12,35 @@ const addForm = (ins) => {
 
   formInsMap[`${namespace}/${formName}`] = ins;
 };
-
 const removeForm = (namespace, formName) => {
   delete formInsMap[`${namespace}/${formName}`];
 };
-
 const getForm = (namespace, formName) => {
   return formInsMap[`${namespace}/${formName}`];
 };
+const runFormMethod = (namespace, formName, method) => {
+  const ins = getForm(namespace, formName);
+
+  if (ins) {
+    return ins[method] && ins[method]();
+  }
+};
+const validate = (namespace, formName, callback) => {
+  if (typeof (formName) == 'function' && arguments.length == 2) {
+    callback = formName;
+    formName = undefined;
+  }
+  const ins = getForm(namespace, formName);
+
+  if (ins) {
+    ins.validate(callback);
+  }
+};
+
+const setFormData = (namespace, formName) => runFormMethod(namespace, formName, 'setData');
+const getFormData = (namespace, formName) => runFormMethod(namespace, formName, 'getData');
+const resetForm = (namespace, formName) => runFormMethod(namespace, formName, 'reset');
+
 
 const isValidateSuccess = function (state, formName) {
   const formValidateData = getFormValidateData(state, formName);
@@ -35,6 +56,12 @@ const isValidateSuccess = function (state, formName) {
 }
 
 class Form extends React.Component {
+  static propTypes = {
+    name: PropTypes.string.isRequired,
+    onSubmit: PropTypes.func,
+    dispatch: PropTypes.func
+  };
+
   dispatch(action) {
     const dispatch = this.props.dispatch || this.context.dispatch;
 
@@ -73,7 +100,6 @@ class Form extends React.Component {
    */
   onFieldChange(field, value) {
     const { name: formName } = this.props;
-
     this.dispatch({
       type: XFORM_FIELD_CHANGE,
       payload: {
@@ -84,20 +110,63 @@ class Form extends React.Component {
   /**
    * 获取表单值
    */
-  getFormData() {
+  getData() {
     const { name: formName } = this.props;
     const state = this.getState();
 
     return state[formName] || {};
+  }
+  reset() {
+    const namespace = this.context.getNamespace();
+    const { name: formName } = this.props;
+    const Model = KOS.getModel(namespace);
+
+    const initialModel = Model.getInitial();
+    this.setData({
+      [formName]: {
+        ...initialModel[formName]
+      }
+    });
+  }
+  setData(formData) {
+    const { name: formName } = this.props;
+
+    this.dispatch({
+      type: 'setState',
+      payload: formData
+    });
   }
   /**
    * 根据字段名称，获取字段的值
    * @param {String} field 字段名称
    */
   getFieldValue(field) {
-    const formData = this.getFormData();
+    const formData = this.getData();
     return formData[field];
   }
+  validate(callback) {
+    const { name: formName } = this.props;
+    this.dispatch({
+      type: XFORM_VALIDATE,
+      payload: {
+        formName,
+        callback
+      }
+    });
+  }
+  onSubmit() {
+    const { onSubmit } = this.props;
+
+    if (onSubmit) {
+      this.validate((result) => {
+        const formData = this.getData();
+        result && onSubmit(formData);
+      });
+    }
+
+    return false;
+  }
+
   getChildContext() {
     return {
       onFieldChange: this.onFieldChange.bind(this),
@@ -115,24 +184,10 @@ class Form extends React.Component {
 
     removeForm(namespace, formName);
   }
-  validate(callback) {
-    const { name: formName } = this.props;
-    this.dispatch({
-      type: XFORM_VALIDATE,
-      payload: {
-        formName,
-        callback
-      }
-    });
-  }
-  onFormSubmit() {
-    const { onSubmit } = this.props;
 
-    onSubmit && onSubmit(this.getFormData());
-  }
   render() {
     const { children } = this.props;
-    return (<form onSubmit={() => { return this.onFormSubmit(); }}>
+    return (<form onSubmit={() => { return this.onSubmit(); }}>
       {children}
     </form>);
   }
@@ -155,27 +210,9 @@ Form.contextTypes = {
 };
 
 Form.getForm = getForm;
-// Form.isValidateSuccess = isValidateSuccess;
-
-Form.validate = (namespace, formName, callback) => {
-  debugger;
-  if (typeof (formName) == 'function' && arguments.length == 2) {
-    callback = formName;
-    formName = undefined;
-  }
-  const ins = getForm(namespace, formName);
-
-  if (ins) {
-    ins.validate(callback);
-  }
-};
-
-Form.getFormData = (namespace, formName) => {
-  const ins = getForm(namespace, formName);
-  if (ins) {
-    return ins.getFormData();
-  }
-};
+Form.getFormData = getFormData;
+Form.resetForm = resetForm;
+Form.validate = validate;
 
 
 export default Form;
