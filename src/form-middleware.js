@@ -1,5 +1,4 @@
 import KOS from 'kos-core';
-import $ from 'lodash';
 
 import { XFORM_FIELD_CHANGE, XFORM_VALIDATE } from './const';
 import { createFieldValuePayload } from './data-util';
@@ -25,28 +24,22 @@ const FormMiddleware = store => next => async (action) => {
 
   await next(action);
 
-  // 表单change
-  if (type === XFORM_FIELD_CHANGE) {
-    // 更新值
-    dispatch({
-      type: `setState`,
-      payload: createFieldValuePayload(action.payload, getState),
-    });
 
-    // const displayResult = fieldDisplayMiddleware(dispatch, getState, action);
+  switch (type) {
+    case XFORM_FIELD_CHANGE:
+      // 更新值
+      dispatch({
+        type: `setState`,
+        payload: createFieldValuePayload(action.payload, getState),
+      });
 
-    // 返回了结果，处理校验器是否可用
-    // if (displayResult && $.isObject(displayResult)) {
-
-    // }
-    fieldChangeHandlers.forEach(handler => {
-      handler(dispatch, getState, action);
-    });
-
-    // 表单校验
-    // formFieldChangeMiddleware(dispatch, getState, action);
-  } else if (type === XFORM_VALIDATE) { // 执行全量表单校验
-    formValidateMiddleware(dispatch, getState, action);
+      fieldChangeHandlers.forEach(handler => {
+        handler(dispatch, getState, action);
+      });
+      break;
+    case XFORM_VALIDATE:
+      await formValidateMiddleware(dispatch, getState, action);
+      break;
   }
 };
 

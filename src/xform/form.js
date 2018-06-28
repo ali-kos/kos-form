@@ -1,13 +1,40 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { getFieldValidateData, getFieldDisplayData } from '../data-util';
+import { getFieldValidateData, getFieldDisplayData, getFormValidateData } from '../data-util';
 
-import { XFORM_VALIDATE_DATA, XFORM_FIELD_CHANGE, XFORM_VALIDATE } from '../const';
+import { XFORM_FIELD_CHANGE, XFORM_VALIDATE } from '../const';
+
+
+const formInsMap = {};
+const addForm = (ins) => {
+  const namespace = ins.context.getNamespace();
+  const formName = ins.props.name;
+
+  formInsMap[`${namespace}/${formName}`] = ins;
+};
+
+const removeForm = (namespace, formName) => {
+  delete formInsMap[`${namespace}/${formName}`];
+};
+
+const getForm = (namespace, formName) => {
+  return formInsMap[`${namespace}/${formName}`];
+};
+
+const isValidateSuccess = function (state, formName) {
+  const formValidateData = getFormValidateData(state, formName);
+  let result = true;
+  for (let field in formValidateData) {
+    const fieldValidateData = formValidateData[field];
+    if (result && fieldValidateData) {
+      result = fieldValidateData.status === 'error';
+    }
+  }
+
+  return result;
+}
 
 class Form extends React.Component {
-  constructor(props) {
-    super(props);
-  }
   dispatch(action) {
     const dispatch = this.props.dispatch || this.context.dispatch;
 
@@ -18,6 +45,7 @@ class Form extends React.Component {
     if (getState) {
       return getState();
     }
+
     return this.props;
   }
   /**
@@ -78,9 +106,33 @@ class Form extends React.Component {
       getFieldDisplayData: this.getFieldDisplayData.bind(this),
     };
   }
+  componentDidMount() {
+    addForm(this);
+  }
+  componentWillUnmount() {
+    const namespace = this.context.getNamespace();
+    const { name: formName } = this.props;
+
+    removeForm(namespace, formName);
+  }
+  validate(callback) {
+    const { name: formName } = this.props;
+    this.dispatch({
+      type: XFORM_VALIDATE,
+      payload: {
+        formName,
+        callback
+      }
+    });
+  }
+  onFormSubmit() {
+    const { onSubmit } = this.props;
+
+    onSubmit && onSubmit(this.getFormData());
+  }
   render() {
     const { children } = this.props;
-    return (<form>
+    return (<form onSubmit={() => { return this.onFormSubmit(); }}>
       {children}
     </form>);
   }
@@ -102,13 +154,28 @@ Form.contextTypes = {
   getNamespace: PropTypes.func,
 };
 
+Form.getForm = getForm;
+// Form.isValidateSuccess = isValidateSuccess;
 
-Form.createValidateAction = ({ formName, callback }) => ({
-  type: XFORM_VALIDATE,
-  payload: {
-    formName,
-    callback,
-  },
-});
+Form.validate = (namespace, formName, callback) => {
+  debugger;
+  if (typeof (formName) == 'function' && arguments.length == 2) {
+    callback = formName;
+    formName = undefined;
+  }
+  const ins = getForm(namespace, formName);
+
+  if (ins) {
+    ins.validate(callback);
+  }
+};
+
+Form.getFormData = (namespace, formName) => {
+  const ins = getForm(namespace, formName);
+  if (ins) {
+    return ins.getFormData();
+  }
+};
+
 
 export default Form;
