@@ -3,6 +3,7 @@ import Validator from './validator';
 
 import { createValidatePayload } from '../data-util';
 
+const KOSUtil = KOS.Util;
 
 /**
  * 获取Model的validatorIns
@@ -31,7 +32,7 @@ const getModelValidatorIns = (model, formName) => {
  * @param {Object} action 包含type、payload的对象实体
  */
 export const fieldValidateMiddleware = async (dispatch, getState, action) => {
-  const { namespace, type } = KOS.splitActionType(action.type);
+  const { namespace, type } = KOSUtil.getActionType(action.type);
   const model = KOS.getModel(namespace);
   const { payload } = action;
   const { formName, field } = payload;
@@ -60,7 +61,7 @@ export const fieldValidateMiddleware = async (dispatch, getState, action) => {
  * @param {Object} action 包含type、payload的对象实体
  */
 export const formValidateMiddleware = async (dispatch, getState, action) => {
-  const { namespace, type } = KOS.splitActionType(action.type);
+  const { namespace, type } = KOSUtil.getActionType(action.type);
   const model = KOS.getModel(namespace);
   const { payload } = action;
   const { formName, field } = payload;

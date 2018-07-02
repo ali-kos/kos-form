@@ -1,6 +1,7 @@
 import KOS from 'kos-core';
 import { createDisplayPayload } from '../data-util';
 
+const KOSUtil = KOS.Util;
 /**
  * 
  * @param {Function} dispatch dispatch方法，包装了namesapce的
@@ -8,7 +9,7 @@ import { createDisplayPayload } from '../data-util';
  * @param {Object} action 包含type、payload的对象实体
  */
 export const fieldDisplayMiddleware = async (dispatch, getState, action) => {
-  const { namespace, type } = KOS.splitActionType(action.type);
+  const { namespace, type } = KOSUtil.getActionType(action.type);
   const model = KOS.getModel(namespace);
   const { payload } = action;
   const { formName, field } = payload;

@@ -8,11 +8,12 @@ import FieldDiaplay from './field-display/index';
 
 const { fieldDisplayMiddleware } = FieldDiaplay;
 const { fieldValidateMiddleware, formValidateMiddleware } = FormValidator;
+const KOSUtil = KOS.Util;
 
 
 const fieldChangeHandlers = [];
 const FormMiddleware = store => next => async (action) => {
-  const { namespace, type } = KOS.splitActionType(action.type);
+  const { namespace, type } = KOSUtil.getActionType(action.type);
   const getState = () => store.getState()[namespace];
   const dispatch = (action) => {
     const { type } = action;
@@ -23,7 +24,6 @@ const FormMiddleware = store => next => async (action) => {
   };
 
   await next(action);
-
 
   switch (type) {
     case XFORM_FIELD_CHANGE:

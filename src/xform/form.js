@@ -100,6 +100,7 @@ class Form extends React.Component {
    */
   onFieldChange(field, value) {
     const { name: formName } = this.props;
+
     this.dispatch({
       type: XFORM_FIELD_CHANGE,
       payload: {
