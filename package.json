@@ -1,6 +1,6 @@
 {
   "name": "kos-form",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "基于kos-core的表单可使用封装",
   "repository": {
     "type": "git",
