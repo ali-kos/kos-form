@@ -19,7 +19,7 @@ const FormMiddleware = store => next => async (action) => {
     const { type } = action;
     store.dispatch({
       ...action,
-      type: `${namespace}/${type}`
+      type: `${namespace}/${type}`,
     });
   };
 
@@ -29,11 +29,11 @@ const FormMiddleware = store => next => async (action) => {
     case XFORM_FIELD_CHANGE:
       // 更新值
       dispatch({
-        type: `setState`,
+        type: 'setState',
         payload: createFieldValuePayload(action.payload, getState),
       });
 
-      fieldChangeHandlers.forEach(handler => {
+      fieldChangeHandlers.forEach((handler) => {
         handler(dispatch, getState, action);
       });
       break;
