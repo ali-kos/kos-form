@@ -1,6 +1,6 @@
 {
   "name": "kos-form",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "基于kos-core的表单可使用封装",
   "repository": {
     "type": "git",
@@ -12,7 +12,7 @@
     "pub": "npm run build && npm publish && rm -rf lib"
   },
   "main": "lib/index.js",
-  "module": "index.js",
+  "module": "lib/index.es.js",
   "dependencies": {
     "kos-core": "^0.1.4",
     "prop-types": "^15.6.1",
