@@ -17,7 +17,6 @@ const getModelValidatorIns = (model, formName) => {
   // 此处有性能优化的空间，如果一个Model下存在多个formName的时候
   if (!validatorMap) {
     const validatorConfig = model.getAttr('validators');
-
     model.validatorMap = validatorMap = validatorConfig ? Validator.create(validatorConfig, namespace) : {};
   }
 
@@ -65,7 +64,6 @@ export const formValidateMiddleware = async (dispatch, getState, action) => {
   const model = KOS.getModel(namespace);
   const { payload } = action;
   const { formName, field } = payload;
-
 
   const validatorIns = getModelValidatorIns(model, formName);
   let formResult = true;

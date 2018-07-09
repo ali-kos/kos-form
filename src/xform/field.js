@@ -5,7 +5,7 @@ export default ({ FieldWrapper, FieldProps }) => {
   class Field extends React.Component {
     static defaultProps = {
       getOnChangeValue: (e) => {
-        return e.value;
+        return e.target.value;
       }
     }
     constructor(props) {
@@ -24,24 +24,22 @@ export default ({ FieldWrapper, FieldProps }) => {
     }
     getDisplay() {
       const { field } = this.props;
-      return this.context.getFieldDisplayData(field);
+      return this.context.getFieldDisplayData(field)===false?false:true;
     }
     fieldChange(onChange) {
-      const { field, getOnChangeValue } = this.props;
-      return (e) => {
-        const getOnChangeValue = this.props;
+      return (function() {
+        const { field, getOnChangeValue } = this.props;
         const value = getOnChangeValue.apply(this, arguments);
 
         onChange && onChange.apply(this, arguments);
         this.context.onFieldChange(field, value);
-      };
+      }).bind(this);
     }
     render() {
       const isDisplay = this.getDisplay();
       if (!isDisplay) {
         return null;
       }
-
 
       const { children } = this.props;
       const validateData = this.getValidateData();

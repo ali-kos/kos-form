@@ -157,13 +157,11 @@ class Form extends React.Component {
   }
   onSubmit() {
     const { onSubmit } = this.props;
-
-    if (onSubmit) {
-      this.validate((result) => {
-        const formData = this.getData();
-        result && onSubmit(formData);
-      });
-    }
+    
+    this.validate((result) => {
+      const formData = this.getData();
+      result && onSubmit && onSubmit(formData);
+    });
 
     return false;
   }
