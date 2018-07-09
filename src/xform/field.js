@@ -3,53 +3,64 @@ import PropTypes from 'prop-types';
 
 export default ({ FieldWrapper, FieldProps }) => {
   class Field extends React.Component {
+    static defaultProps = {
+      getOnChangeValue: (e) => {
+        return e.value;
+      }
+    }
     constructor(props) {
       super(props);
 
       this.onFieldChange = this.fieldChange.bind(this);
       this.getFieldValue = this.getValue.bind(this);
     }
-    getValue(field) {
+    getValue() {
+      const { field } = this.props;
       return this.context.getFieldValue(field);
     }
-    getValidateData(field) {
+    getValidateData() {
+      const { field } = this.props;
       return this.context.getFieldVaidateData(field);
     }
-    getDisplay(field) {
-      const display = this.context.getFieldDisplayData(field);
-
-      return display === false ? 'none' : '';
+    getDisplay() {
+      const { field } = this.props;
+      return this.context.getFieldDisplayData(field);
     }
-    fieldChange(field, onChange) {
+    fieldChange(onChange) {
+      const { field, getOnChangeValue } = this.props;
       return (e) => {
-        const { value } = e.target;
-        onChange && onChange.call(e.target, e, field, value);
+        const getOnChangeValue = this.props;
+        const value = getOnChangeValue.apply(this, arguments);
+
+        onChange && onChange.apply(this, arguments);
         this.context.onFieldChange(field, value);
       };
     }
     render() {
-      const { children, field } = this.props;
-      const validateData = this.getValidateData(field);
+      const isDisplay = this.getDisplay();
+      if (!isDisplay) {
+        return null;
+      }
 
+
+      const { children } = this.props;
+      const validateData = this.getValidateData();
 
       const fieldProps = {
         ...FieldProps,
-        ...this.props
+        ...this.props,
+        ...validateData,
       };
-
-      fieldProps.style = fieldProps.style || {};
-      fieldProps.style.display = this.getDisplay(field);
 
       return (<FieldWrapper
         {...fieldProps}
-        {...validateData}
       >
         {React.Children.map(children, (child) => {
           const { onChange } = child.props;
           const props = {
             ...child.props,
-            onChange: this.onFieldChange(field, onChange),
-            value: this.getFieldValue(field),
+            onChange: this.onFieldChange(onChange),
+            value: this.getFieldValue(),
           };
           return React.createElement(child.type, props);
         })}

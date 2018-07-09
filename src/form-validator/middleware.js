@@ -18,7 +18,7 @@ const getModelValidatorIns = (model, formName) => {
   if (!validatorMap) {
     const validatorConfig = model.getAttr('validators');
 
-    model.validatorMap = validatorMap = Validator.create(validatorConfig, namespace);
+    model.validatorMap = validatorMap = validatorConfig ? Validator.create(validatorConfig, namespace) : {};
   }
 
   return validatorMap[formName];
@@ -84,9 +84,3 @@ export const formValidateMiddleware = async (dispatch, getState, action) => {
   const { callback } = payload;
   callback && callback(formResult);
 }
-
-
-// export default {
-//   fieldValidateMiddleware,
-//   formValidateMiddleware
-// }
