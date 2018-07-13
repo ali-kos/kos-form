@@ -17,8 +17,7 @@ const getModelValidatorIns = (model, formName) => {
   // 此处有性能优化的空间，如果一个Model下存在多个formName的时候
   if (!validatorMap) {
     const validatorConfig = model.getAttr('validators');
-
-    model.validatorMap = validatorMap = Validator.create(validatorConfig, namespace);
+    model.validatorMap = validatorMap = validatorConfig ? Validator.create(validatorConfig, namespace) : {};
   }
 
   return validatorMap[formName];
@@ -66,7 +65,6 @@ export const formValidateMiddleware = async (dispatch, getState, action) => {
   const { payload } = action;
   const { formName, field } = payload;
 
-
   const validatorIns = getModelValidatorIns(model, formName);
   let formResult = true;
   if (validatorIns) {
@@ -84,9 +82,3 @@ export const formValidateMiddleware = async (dispatch, getState, action) => {
   const { callback } = payload;
   callback && callback(formResult);
 }
-
-
-// export default {
-//   fieldValidateMiddleware,
-//   formValidateMiddleware
-// }

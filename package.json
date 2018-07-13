@@ -1,6 +1,12 @@
 {
   "name": "kos-form",
-  "version": "0.1.2",
+  "version": "0.1.4",
+  "keywords": [
+    "kos",
+    "kos-core",
+    "redux",
+    "redux-form"
+  ],
   "description": "基于kos-core的表单可使用封装",
   "repository": {
     "type": "git",
@@ -14,16 +20,18 @@
   "main": "lib/index.js",
   "module": "lib/index.es.js",
   "dependencies": {
-    "kos-core": "^0.1.4",
+    "babel-runtime": "^6.26.0",
+    "kos-core": "^1.0.0",
+    "lodash": "^4.17.5",
     "prop-types": "^15.6.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-redux": "^5.0.7",
-    "redux": "3",
-    "lodash": "^4.17.5"
+    "redux": "3"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
+    "babel-eslint": "^8.2.5",
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-plugin-transform-async-to-generator": "^6.24.1",
     "babel-plugin-transform-class-properties": "^6.24.1",
