@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+
 export default ({ FieldWrapper, FieldProps }) => {
-  class Field extends React.Component {
+  class Field extends React.PureComponent {
     static defaultProps = {
       getOnChangeValue: (e) => {
         return e.target.value;
@@ -11,12 +12,15 @@ export default ({ FieldWrapper, FieldProps }) => {
     constructor(props) {
       super(props);
 
+      this.state = {};
+
       this.onFieldChange = this.fieldChange.bind(this);
       this.getFieldValue = this.getValue.bind(this);
     }
     getValue() {
       const { field } = this.props;
-      return this.context.getFieldValue(field);
+
+      return this.isOnComposition ? this.state.inputValue : this.context.getFieldValue(field);
     }
     getValidateData() {
       const { field } = this.props;
@@ -24,16 +28,40 @@ export default ({ FieldWrapper, FieldProps }) => {
     }
     getDisplay() {
       const { field } = this.props;
-      return this.context.getFieldDisplayData(field)===false?false:true;
+      return this.context.getFieldDisplayData(field) === false ? false : true;
     }
     fieldChange(onChange) {
-      return (function() {
+      var _this = this;
+      return (function (e) {
         const { field, getOnChangeValue } = this.props;
         const value = getOnChangeValue.apply(this, arguments);
 
-        onChange && onChange.apply(this, arguments);
-        this.context.onFieldChange(field, value);
+        if (this.isOnComposition) {
+          this.innerValue = value;
+          this.setState({
+            inputValue: value
+          });
+        } else {
+          onChange && onChange.apply(this, arguments);
+          this.context.onFieldChange(field, value);
+        }
       }).bind(this);
+    }
+    onCompositionHandler(type, e) {
+      switch (type) {
+        case 'start':
+          this.isOnComposition = true;
+          break;
+        case 'update':
+          this.isOnComposition = true;
+          break;
+        case 'end':
+          this.isOnComposition = false;
+          if (e.target instanceof HTMLInputElement && !this.isOnComposition) {
+            this.onChange(e);
+          }
+          break;
+      }
     }
     render() {
       const isDisplay = this.getDisplay();
@@ -55,9 +83,13 @@ export default ({ FieldWrapper, FieldProps }) => {
       >
         {React.Children.map(children, (child) => {
           const { onChange } = child.props;
+          this.onChange = this.onFieldChange(onChange);
           const props = {
             ...child.props,
-            onChange: this.onFieldChange(onChange),
+            onChange: this.onChange,
+            onCompositionStart: this.onCompositionHandler.bind(this, 'start'),
+            onCompositionUpdate: this.onCompositionHandler.bind(this, 'update'),
+            onCompositionEnd: this.onCompositionHandler.bind(this, 'end'),
             value: this.getFieldValue(),
           };
           return React.createElement(child.type, props);
