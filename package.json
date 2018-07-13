@@ -7,7 +7,7 @@
     "redux",
     "redux-form"
   ],
-  "description": "基于kos-core的表单可使用封装",
+  "description": "基于kos-core的表单封装",
   "repository": {
     "type": "git",
     "url": "https://github.com/ali-kos/kos"
