@@ -19,8 +19,8 @@ export default ({ FieldWrapper, FieldProps }) => {
       return this.context.getFieldValue(field);
     }
     getValidateData() {
-      const { field } = this.props;
-      return this.context.getFieldVaidateData(field);
+      const { field, fieldType } = this.props;
+      return this.context.getFieldVaidateData(field, fieldType);
     }
     getDisplay() {
       const { field } = this.props;
@@ -28,12 +28,24 @@ export default ({ FieldWrapper, FieldProps }) => {
     }
     fieldChange(onChange) {
       return (function() {
-        const { field, getOnChangeValue } = this.props;
+        const { field, getOnChangeValue, fieldType } = this.props;
         const value = getOnChangeValue.apply(this, arguments);
 
         onChange && onChange.apply(this, arguments);
-        this.context.onFieldChange(field, value);
+        this.context.onFieldChange(field, value, fieldType);
       }).bind(this);
+    }
+    register(destroy) {
+      const { field, fieldType } = this.props;
+      if(fieldType !== undefined) {
+        this.context.setFieldType(field, fieldType, destroy);
+      }
+    }
+    componentWillMount() {
+      this.register();
+    }
+    componentWillUnmount() {
+      this.register(true);
     }
     render() {
       const isDisplay = this.getDisplay();
@@ -67,6 +79,7 @@ export default ({ FieldWrapper, FieldProps }) => {
   }
 
   Field.contextTypes = {
+    setFieldType: PropTypes.func,
     onFieldChange: PropTypes.func,
     getFieldValue: PropTypes.func,
     getFieldVaidateData: PropTypes.func,

@@ -1,4 +1,4 @@
-import { XFORM_VALIDATE_DATA, XFORM_DISPLAY_DATA } from './const';
+import { XFORM_VALIDATE_DATA, XFORM_TYPE_MAP_DATA, XFORM_DISPLAY_DATA } from './const';
 
 
 /**
@@ -14,17 +14,31 @@ import { XFORM_VALIDATE_DATA, XFORM_DISPLAY_DATA } from './const';
  * }结果
  */
 export const createValidatePayload = (payload, getState, resultMap) => {
-  const { formName } = payload;
+  const { formName, vasKey } = payload;
   const newPayload = {};
   const state = getState();
 
   const stateValidateData = {
     ...state[XFORM_VALIDATE_DATA],
   };
-  const formValidateData = {
-    ...stateValidateData[formName],
-    ...resultMap,
-  };
+
+  let formValidateData;
+  if (vasKey) {
+    formValidateData = {
+      ...stateValidateData[formName],
+    };
+    const fieldTypeValidateData = {
+      ...formValidateData[vasKey],
+      ...resultMap,
+    }
+    formValidateData[vasKey] = fieldTypeValidateData;
+  } else {
+    formValidateData = {
+      ...stateValidateData[formName],
+      ...resultMap,
+    };
+  }
+  
 
   stateValidateData[formName] = formValidateData;
   newPayload[XFORM_VALIDATE_DATA] = stateValidateData;
@@ -111,4 +125,61 @@ export const getFieldDisplayData = (state, formName, field) => {
   formValidateData = formValidateData[formName] || {};
 
   return formValidateData[field];
+}
+
+
+// 创建type 和 field对应关系
+export const createTypeMapPayload = (payload, getState) => {
+  const { formName, field, typeName, destroy } = payload;
+  const state = getState();
+  const newPayload = {};
+
+  const stateTypeMapData = {
+    ...state[XFORM_TYPE_MAP_DATA],
+  };
+
+  const formTypeMapData = {
+    ...stateTypeMapData[formName],
+  }
+
+  const typeChildren = [
+    ...(formTypeMapData[typeName] || []),
+  ];
+
+  if (destroy) {
+    const index = typeChildren.indexOf(field);
+    typeChildren.splice(index, 1);
+  } else {
+    typeChildren.push(field);
+  }
+
+  formTypeMapData[typeName] = typeChildren;
+  stateTypeMapData[formName] = formTypeMapData;
+  newPayload[XFORM_TYPE_MAP_DATA] = stateTypeMapData;
+
+  return newPayload;
+}
+
+// 获取fieldType下面所有field 用于form全部校验
+export const getTypeChildrenData = (typeName, formName, getState) => {
+  const state = getState();
+
+  const stateTypeMapData = state[XFORM_TYPE_MAP_DATA] || {};
+  const formTypeMapData = stateTypeMapData[formName] || {};
+  const typeChildren = formTypeMapData[typeName] || [];
+
+  return typeChildren;
+}
+
+
+export const getSymbolTypeName = typeName => {
+  return `@@${typeName}`;
+}
+
+export const isSymbolTypeName = symbolTypeName => {
+  return (/^@@/).test(symbolTypeName);
+}
+
+export const toTypeName = symbolTypeName => {
+  return symbolTypeName.replace(/^@@/, '');
 }

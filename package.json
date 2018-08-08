@@ -15,6 +15,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "build": "rm -rf lib && rollup -c",
+    "build-win": "rollup -c",
     "pub": "npm run build && npm publish && rm -rf lib"
   },
   "main": "lib/index.js",

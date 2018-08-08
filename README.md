@@ -110,4 +110,21 @@ validators:[{
 
 **指定校验器名称**
 
+**通过Field类型校验**
+
+```jsx
+  <Field field="a" fieldType="typeA"></Field>
+  <Field field="b" fieldType="typeA"></Field>
+```
+
+```js
+validators:[{
+  formName:'addForm',
+  validators:[{
+    type:'typeA',
+    rules:'required'
+  }]
+}]
+```
+
 
