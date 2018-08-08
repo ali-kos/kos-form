@@ -1,7 +1,7 @@
 import KOS from 'kos-core';
 
-import { XFORM_FIELD_CHANGE, XFORM_VALIDATE } from './const';
-import { createFieldValuePayload } from './data-util';
+import { XFORM_FIELD_CHANGE, XFORM_VALIDATE, XFORM_TYPE_MAP } from './const';
+import { createFieldValuePayload, createTypeMapPayload } from './data-util';
 import FormValidator from './form-validator/index';
 import FieldDiaplay from './field-display/index';
 
@@ -39,6 +39,12 @@ const FormMiddleware = store => next => async (action) => {
       break;
     case XFORM_VALIDATE:
       await formValidateMiddleware(dispatch, getState, action);
+      break;
+    case XFORM_TYPE_MAP:
+      dispatch({
+        type: 'setState',
+        payload: createTypeMapPayload(action.payload, getState),
+      })
       break;
   }
 };

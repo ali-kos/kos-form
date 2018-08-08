@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { getFieldValidateData, getFieldDisplayData, getFormValidateData, createFormDataPayload } from '../data-util';
+import { getFieldValidateData, getFieldDisplayData, getFormValidateData, createFormDataPayload, getSymbolTypeName } from '../data-util';
 
-import { XFORM_FIELD_CHANGE, XFORM_VALIDATE } from '../const';
+import { XFORM_FIELD_CHANGE, XFORM_VALIDATE, XFORM_TYPE_MAP } from '../const';
 
 
 const formInsMap = {};
@@ -87,10 +87,16 @@ class Form extends React.Component {
   /**
    * 根据字段名称，获取字段的校验数据
    * @param {String} field 字段名称
+   * @param {String} fieldType 字段名称
    */
-  getFieldVaidateData(field) {
+  getFieldVaidateData(field, fieldType) {
     const { name: formName } = this.props;
     const state = this.getState();
+    if (fieldType !== undefined) {
+      const symbolTypeName = getSymbolTypeName(fieldType);
+      const typeChildren = getFieldValidateData(state, formName, symbolTypeName) || {};
+      return typeChildren[field];
+    }
     return getFieldValidateData(state, formName, field);
   }
   /**
@@ -98,13 +104,25 @@ class Form extends React.Component {
    * @param {String} field 字段名称
    * @param {String} value 值
    */
-  onFieldChange(field, value) {
+  onFieldChange(field, value, fieldType) {
     const { name: formName } = this.props;
 
     this.dispatch({
       type: XFORM_FIELD_CHANGE,
       payload: {
-        field, value, formName,
+        field, value, formName, fieldType,
+      },
+    });
+  }
+  /**
+   * Field初始化时触发
+   */
+  setFieldType(field, typeName, destroy) {
+    const { name: formName } = this.props;
+    this.dispatch({
+      type: XFORM_TYPE_MAP,
+      payload: {
+        field, typeName, formName, destroy,
       },
     });
   }
@@ -168,6 +186,7 @@ class Form extends React.Component {
 
   getChildContext() {
     return {
+      setFieldType: this.setFieldType.bind(this),
       onFieldChange: this.onFieldChange.bind(this),
       getFieldValue: this.getFieldValue.bind(this),
       getFieldVaidateData: this.getFieldVaidateData.bind(this),
@@ -194,6 +213,7 @@ class Form extends React.Component {
 
 // 传递给field用的
 Form.childContextTypes = {
+  setFieldType: PropTypes.func,
   onFieldChange: PropTypes.func,
   getFieldValue: PropTypes.func,
   getFieldVaidateData: PropTypes.func,

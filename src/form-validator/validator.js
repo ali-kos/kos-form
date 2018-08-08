@@ -1,5 +1,5 @@
 import FieldValidator from './field-validator';
-
+import { isSymbolTypeName, getTypeChildrenData, toTypeName } from '../data-util';
 class Validator {
   constructor(validators = [], namespace, formName) {
     this.formName = formName;
@@ -10,6 +10,21 @@ class Validator {
   getValidatorsByField(field) {
     return this.fieldValidateIns[field] || null;
   }
+  async runFieldType(payload, getState) {
+    const { vasKey, formName, formData } = payload;
+    const typeName = toTypeName(vasKey);
+    const fieldList = getTypeChildrenData(typeName, formName, getState);
+    const fieldListResult = {};
+    let noError = true;
+    for(const field of fieldList) {
+      const value = formData[field];
+      const newPayload = { field, formName, value, vasKey };
+      const fieldResult = await this.run(newPayload, getState);
+      fieldListResult[field] = fieldResult;
+      noError = noError && (fieldResult ? fieldResult.validateStatus !== 'error' : true);
+    }
+    return {fieldListResult, noError};
+  }
   async runAll(getState) {
     const { formName, fieldValidateIns } = this;
     const state = getState();
@@ -19,16 +34,23 @@ class Validator {
     const fieldResult = {};
     let formResult = true;
 
-    for (const field in fieldValidateIns) {
-      const value = formData[field];
-      const result = await this.run({
-        field,
-        value,
-        formName,
-      }, getState);
+    for (const vasKey in fieldValidateIns) {
 
-      formResult = formResult && (result ? result.validateStatus !== 'error' : true);
-      fieldResult[field] = result;
+      let result;
+      const isFieldType = isSymbolTypeName(vasKey);
+
+      if (isFieldType) {
+        const {fieldListResult, noError} = await this.runFieldType({ vasKey, formName, formData }, getState);
+        formResult = formResult && noError;
+        result = fieldListResult;
+      } else {
+        const field = vasKey;
+        const value = formData[field];
+        result = await this.run({ field, value, formName }, getState);
+        formResult = formResult && (result ? result.validateStatus !== 'error' : true);
+      }
+
+      fieldResult[vasKey] = result;
     }
 
     return {
@@ -37,9 +59,9 @@ class Validator {
     };
   }
   async run(payload, getState) {
-    const { field } = payload;
-    const fieldValidate = this.getValidatorsByField(field);
+    const { field, vasKey } = payload;
 
+    const fieldValidate = this.getValidatorsByField(vasKey || field);
     if (!fieldValidate) {
       return null;
     }

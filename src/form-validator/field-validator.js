@@ -1,5 +1,5 @@
 import { parseValidatorRules, runRule } from './validator-rule';
-import { getFieldDisplayData } from '../data-util';
+import { getFieldDisplayData, getSymbolTypeName } from '../data-util';
 
 class FieldValidator {
   constructor(field, validators) {
@@ -41,7 +41,6 @@ class FieldValidator {
 
       if (validator && validator.fn) {
         const result = await runRule(validator, payload, getState);
-
         // 遇到错误，立刻退出
         if (result.validateStatus === 'error') {
           validateResult = result;
@@ -58,11 +57,14 @@ FieldValidator.factory = (validators) => {
   const vas = {};
 
   validators.forEach((validatorItem) => {
-    const { field } = validatorItem;
+    const { field, type } = validatorItem;
     const list = parseValidatorRules(validatorItem);
 
-    vas[field] = vas[field] || [];
-    vas[field] = vas[field].concat(list);
+    const vasKey = type ? getSymbolTypeName(type) : field;
+    if (vasKey === undefined) return;
+
+    vas[vasKey] = vas[vasKey] || [];
+    vas[vasKey] = vas[vasKey].concat(list);
   });
 
   // 转换成对象进行管理

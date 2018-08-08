@@ -1,7 +1,7 @@
 import KOS from 'kos-core';
 import Validator from './validator';
 
-import { createValidatePayload } from '../data-util';
+import { createValidatePayload, getSymbolTypeName } from '../data-util';
 
 const KOSUtil = KOS.Util;
 
@@ -34,11 +34,14 @@ export const fieldValidateMiddleware = async (dispatch, getState, action) => {
   const { namespace, type } = KOSUtil.getActionType(action.type);
   const model = KOS.getModel(namespace);
   const { payload } = action;
-  const { formName, field } = payload;
+  const { formName, field, fieldType } = payload;
 
   // 有表单校验相关配置
   const validatorIns = getModelValidatorIns(model, formName);
   if (validatorIns) {
+    if (fieldType !== undefined) {
+      payload.vasKey = getSymbolTypeName(fieldType);
+    }
     const result = await validatorIns.run(payload, getState);
     const fieldResult = {};
     fieldResult[field] = result;
