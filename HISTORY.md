@@ -10,3 +10,7 @@
 ## v1.0.1
 
 * 修复input,testarea等组件输入中文的bug
+
+## v1.0.2
+
+* 修复setData方法错误
