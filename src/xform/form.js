@@ -1,12 +1,16 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { getFieldValidateData, getFieldDisplayData, getFormValidateData, createFormDataPayload } from '../data-util';
+import React from "react";
+import PropTypes from "prop-types";
+import {
+  getFieldValidateData,
+  getFieldDisplayData,
+  getFormValidateData,
+  createFormDataPayload
+} from "../data-util";
 
-import { XFORM_FIELD_CHANGE, XFORM_VALIDATE } from '../const';
-
+import { XFORM_FIELD_CHANGE, XFORM_VALIDATE } from "../const";
 
 const formInsMap = {};
-const addForm = (ins) => {
+const addForm = ins => {
   const namespace = ins.context.getNamespace();
   const formName = ins.props.name;
 
@@ -26,7 +30,7 @@ const runFormMethod = (namespace, formName, method) => {
   }
 };
 const validate = (namespace, formName, callback) => {
-  if (typeof (formName) == 'function' && arguments.length == 2) {
+  if (typeof formName == "function" && arguments.length == 2) {
     callback = formName;
     formName = undefined;
   }
@@ -37,23 +41,25 @@ const validate = (namespace, formName, callback) => {
   }
 };
 
-const setFormData = (namespace, formName) => runFormMethod(namespace, formName, 'setData');
-const getFormData = (namespace, formName) => runFormMethod(namespace, formName, 'getData');
-const resetForm = (namespace, formName) => runFormMethod(namespace, formName, 'reset');
+const setFormData = (namespace, formName) =>
+  runFormMethod(namespace, formName, "setData");
+const getFormData = (namespace, formName) =>
+  runFormMethod(namespace, formName, "getData");
+const resetForm = (namespace, formName) =>
+  runFormMethod(namespace, formName, "reset");
 
-
-const isValidateSuccess = function (state, formName) {
+const isValidateSuccess = function(state, formName) {
   const formValidateData = getFormValidateData(state, formName);
   let result = true;
   for (let field in formValidateData) {
     const fieldValidateData = formValidateData[field];
     if (result && fieldValidateData) {
-      result = fieldValidateData.status === 'error';
+      result = fieldValidateData.status === "error";
     }
   }
 
   return result;
-}
+};
 
 class Form extends React.Component {
   static propTypes = {
@@ -82,7 +88,7 @@ class Form extends React.Component {
   getFieldDisplayData(field) {
     const { name: formName } = this.props;
     const state = this.getState();
-    return getFieldDisplayData(state, formName, field)
+    return getFieldDisplayData(state, formName, field);
   }
   /**
    * 根据字段名称，获取字段的校验数据
@@ -104,8 +110,10 @@ class Form extends React.Component {
     this.dispatch({
       type: XFORM_FIELD_CHANGE,
       payload: {
-        field, value, formName,
-      },
+        field,
+        value,
+        formName
+      }
     });
   }
   /**
@@ -123,18 +131,16 @@ class Form extends React.Component {
     const Model = KOS.getModel(namespace);
 
     const initialModel = Model.getInitial();
-    this.setData({
-      [formName]: {
-        ...initialModel[formName]
-      }
-    });
+    this.setData(initialModel[formName]);
   }
   setData(formData) {
     const { name: formName } = this.props;
 
     this.dispatch({
-      type: 'setState',
-      payload: formData
+      type: "setState",
+      payload: {
+        [formName]: formData
+      }
     });
   }
   /**
@@ -157,8 +163,8 @@ class Form extends React.Component {
   }
   onSubmit() {
     const { onSubmit } = this.props;
-    
-    this.validate((result) => {
+
+    this.validate(result => {
       const formData = this.getData();
       result && onSubmit && onSubmit(formData);
     });
@@ -171,7 +177,7 @@ class Form extends React.Component {
       onFieldChange: this.onFieldChange.bind(this),
       getFieldValue: this.getFieldValue.bind(this),
       getFieldVaidateData: this.getFieldVaidateData.bind(this),
-      getFieldDisplayData: this.getFieldDisplayData.bind(this),
+      getFieldDisplayData: this.getFieldDisplayData.bind(this)
     };
   }
   componentDidMount() {
@@ -186,9 +192,15 @@ class Form extends React.Component {
 
   render() {
     const { children } = this.props;
-    return (<form onSubmit={() => { return this.onSubmit(); }}>
-      {children}
-    </form>);
+    return (
+      <form
+        onSubmit={() => {
+          return this.onSubmit();
+        }}
+      >
+        {children}
+      </form>
+    );
   }
 }
 
@@ -197,21 +209,19 @@ Form.childContextTypes = {
   onFieldChange: PropTypes.func,
   getFieldValue: PropTypes.func,
   getFieldVaidateData: PropTypes.func,
-  getFieldDisplayData: PropTypes.func,
+  getFieldDisplayData: PropTypes.func
 };
-
 
 // 来自wrapper
 Form.contextTypes = {
   dispatch: PropTypes.func,
   getState: PropTypes.func,
-  getNamespace: PropTypes.func,
+  getNamespace: PropTypes.func
 };
 
 Form.getForm = getForm;
 Form.getFormData = getFormData;
 Form.resetForm = resetForm;
 Form.validate = validate;
-
 
 export default Form;
