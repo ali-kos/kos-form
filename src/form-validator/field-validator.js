@@ -1,5 +1,5 @@
-import { parseValidatorRules, runRule } from './validator-rule';
-import { getFieldDisplayData } from '../data-util';
+import { parseValidatorRules, runRule } from "./validator-rule";
+import { getFieldDisplayData } from "../data-util";
 
 class FieldValidator {
   constructor(field, validators) {
@@ -11,7 +11,7 @@ class FieldValidator {
   }
   initValidator(validators) {
     let list = [];
-    validators.forEach((item) => {
+    validators.forEach(item => {
       list = list.concat(item);
     });
     return list;
@@ -43,7 +43,7 @@ class FieldValidator {
         const result = await runRule(validator, payload, getState);
 
         // 遇到错误，立刻退出
-        if (result.validateStatus === 'error') {
+        if (result.validateStatus === "error") {
           validateResult = result;
           break;
         }
@@ -54,10 +54,10 @@ class FieldValidator {
   }
 }
 
-FieldValidator.factory = (validators) => {
+FieldValidator.factory = validators => {
   const vas = {};
 
-  validators.forEach((validatorItem) => {
+  validators.forEach(validatorItem => {
     const { field } = validatorItem;
     const list = parseValidatorRules(validatorItem);
 
@@ -74,6 +74,5 @@ FieldValidator.factory = (validators) => {
 
   return vas;
 };
-
 
 export default FieldValidator;

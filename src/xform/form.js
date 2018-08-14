@@ -68,6 +68,13 @@ class Form extends React.Component {
     dispatch: PropTypes.func
   };
 
+  constructor(props) {
+    super(props);
+
+    this.fieldList = [];
+    this.fieldTypeMap = {};
+  }
+
   dispatch(action) {
     const dispatch = this.props.dispatch || this.context.dispatch;
 
@@ -101,16 +108,18 @@ class Form extends React.Component {
   }
   /**
    * 字段值发生变化时触发
-   * @param {String} field 字段名称
+   * @param {String} field 字段名称，表单内不可重复
    * @param {String} value 值
+   * @param {String} fieldType 字段类型，表单内可重复
    */
-  onFieldChange(field, value) {
+  onFieldChange(field, value, fieldType) {
     const { name: formName } = this.props;
 
     this.dispatch({
       type: XFORM_FIELD_CHANGE,
       payload: {
         field,
+        fieldType,
         value,
         formName
       }
@@ -153,10 +162,12 @@ class Form extends React.Component {
   }
   validate(callback) {
     const { name: formName } = this.props;
+    const { fieldTypeMap } = this;
     this.dispatch({
       type: XFORM_VALIDATE,
       payload: {
         formName,
+        fieldTypeMap,
         callback
       }
     });
@@ -171,9 +182,25 @@ class Form extends React.Component {
 
     return false;
   }
+  registerField(field, fieldType) {
+    this.fieldList.push(field);
 
+    if (fieldType) {
+      this.fieldTypeMap[field] = fieldType;
+    }
+  }
+  revokeField(field) {
+    const index = this.fieldList.indexOf(field);
+    if (index > -1) {
+      this.fieldList.splice(index, 1);
+    }
+
+    delete this.fieldTypeMap[field];
+  }
   getChildContext() {
     return {
+      registerField: this.registerField.bind(this),
+      revokeField: this.revokeField.bind(this),
       onFieldChange: this.onFieldChange.bind(this),
       getFieldValue: this.getFieldValue.bind(this),
       getFieldVaidateData: this.getFieldVaidateData.bind(this),
@@ -206,6 +233,8 @@ class Form extends React.Component {
 
 // 传递给field用的
 Form.childContextTypes = {
+  registerField: PropTypes.func,
+  revokeField: PropTypes.func,
   onFieldChange: PropTypes.func,
   getFieldValue: PropTypes.func,
   getFieldVaidateData: PropTypes.func,

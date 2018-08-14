@@ -1,4 +1,4 @@
-import FieldValidator from './field-validator';
+import FieldValidator from "./field-validator";
 
 class Validator {
   constructor(validators = [], namespace, formName) {
@@ -7,12 +7,15 @@ class Validator {
 
     this.fieldValidateIns = FieldValidator.factory(validators);
   }
-  getValidatorsByField(field) {
-    return this.fieldValidateIns[field] || null;
+  getValidatorsByField(field, fieldType) {
+    return (
+      this.fieldValidateIns[field] || this.fieldValidateIns[fieldType] || null
+    );
   }
-  async runAll(getState) {
+  async runAll(payload, getState) {
     const { formName, fieldValidateIns } = this;
     const state = getState();
+    const { fieldTypeMap } = payload;
     let formData = formName ? state[formName] : state;
     formData = formData || {};
 
@@ -21,24 +24,29 @@ class Validator {
 
     for (const field in fieldValidateIns) {
       const value = formData[field];
-      const result = await this.run({
-        field,
-        value,
-        formName,
-      }, getState);
+      const result = await this.run(
+        {
+          field,
+          fieldType: fieldTypeMap[field],
+          value,
+          formName
+        },
+        getState
+      );
 
-      formResult = formResult && (result ? result.validateStatus !== 'error' : true);
+      formResult =
+        formResult && (result ? result.validateStatus !== "error" : true);
       fieldResult[field] = result;
     }
 
     return {
       formResult,
-      fieldResult,
+      fieldResult
     };
   }
   async run(payload, getState) {
-    const { field } = payload;
-    const fieldValidate = this.getValidatorsByField(field);
+    const { field, fieldType } = payload;
+    const fieldValidate = this.getValidatorsByField(field, fieldType);
 
     if (!fieldValidate) {
       return null;
@@ -48,11 +56,10 @@ class Validator {
   }
 }
 
-
 Validator.create = (validatorConfig, namespace) => {
   const map = {};
   const validatorMap = {};
-  validatorConfig.forEach((item) => {
+  validatorConfig.forEach(item => {
     const { formName, validators } = item;
 
     let fvList = map[formName] || [];
@@ -71,6 +78,5 @@ Validator.create = (validatorConfig, namespace) => {
 
   return validatorMap;
 };
-
 
 export default Validator;
