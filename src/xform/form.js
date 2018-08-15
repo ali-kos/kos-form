@@ -162,12 +162,13 @@ class Form extends React.Component {
   }
   validate(callback) {
     const { name: formName } = this.props;
-    const { fieldTypeMap } = this;
+    const { fieldTypeMap, fieldList } = this;
     this.dispatch({
       type: XFORM_VALIDATE,
       payload: {
         formName,
         fieldTypeMap,
+        fieldList,
         callback
       }
     });

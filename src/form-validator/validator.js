@@ -15,19 +15,21 @@ class Validator {
   async runAll(payload, getState) {
     const { formName, fieldValidateIns } = this;
     const state = getState();
-    const { fieldTypeMap } = payload;
+    const { fieldTypeMap, fieldList } = payload;
     let formData = formName ? state[formName] : state;
     formData = formData || {};
 
     const fieldResult = {};
     let formResult = true;
 
-    for (const field in fieldValidateIns) {
+    fieldList.forEach(field => {
+      const fieldType = fieldTypeMap[field];
+
       const value = formData[field];
       const result = await this.run(
         {
           field,
-          fieldType: fieldTypeMap[field],
+          fieldType,
           value,
           formName
         },
@@ -37,7 +39,7 @@ class Validator {
       formResult =
         formResult && (result ? result.validateStatus !== "error" : true);
       fieldResult[field] = result;
-    }
+    });
 
     return {
       formResult,
