@@ -22,7 +22,7 @@ class Validator {
     const fieldResult = {};
     let formResult = true;
 
-    fieldList.forEach(field => {
+    for(const field of fieldList) {
       const fieldType = fieldTypeMap[field];
 
       const value = formData[field];
@@ -39,7 +39,7 @@ class Validator {
       formResult =
         formResult && (result ? result.validateStatus !== "error" : true);
       fieldResult[field] = result;
-    });
+    };
 
     return {
       formResult,

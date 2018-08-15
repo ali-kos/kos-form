@@ -22,11 +22,11 @@ export default ({ FieldWrapper, FieldProps }) => {
     }
     componentDidMount() {
       const { fieldType, field } = this.props;
-      this.context && this.context.registerField(fieldType, field);
+      this.context && this.context.registerField(field, fieldType);
     }
     componentWillUnmount() {
       const { fieldType, field } = this.props;
-      this.context && this.context.revokeField(fieldType, field);
+      this.context && this.context.revokeField(field, fieldType);
     }
     getValue() {
       const { field } = this.props;

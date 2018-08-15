@@ -112,7 +112,7 @@ class Form extends React.Component {
    * @param {String} value 值
    * @param {String} fieldType 字段类型，表单内可重复
    */
-  onFieldChange(field, value, fieldType) {
+  onFieldChange({field, value, fieldType}) {
     const { name: formName } = this.props;
 
     this.dispatch({
