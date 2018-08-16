@@ -1,12 +1,16 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { getFieldValidateData, getFieldDisplayData, getFormValidateData, createFormDataPayload } from '../data-util';
+import React from "react";
+import PropTypes from "prop-types";
+import {
+  getFieldValidateData,
+  getFieldDisplayData,
+  getFormValidateData,
+  createFormDataPayload
+} from "../data-util";
 
-import { XFORM_FIELD_CHANGE, XFORM_VALIDATE } from '../const';
-
+import { XFORM_FIELD_CHANGE, XFORM_VALIDATE } from "../const";
 
 const formInsMap = {};
-const addForm = (ins) => {
+const addForm = ins => {
   const namespace = ins.context.getNamespace();
   const formName = ins.props.name;
 
@@ -26,7 +30,7 @@ const runFormMethod = (namespace, formName, method) => {
   }
 };
 const validate = (namespace, formName, callback) => {
-  if (typeof (formName) == 'function' && arguments.length == 2) {
+  if (typeof formName == "function" && arguments.length == 2) {
     callback = formName;
     formName = undefined;
   }
@@ -37,23 +41,25 @@ const validate = (namespace, formName, callback) => {
   }
 };
 
-const setFormData = (namespace, formName) => runFormMethod(namespace, formName, 'setData');
-const getFormData = (namespace, formName) => runFormMethod(namespace, formName, 'getData');
-const resetForm = (namespace, formName) => runFormMethod(namespace, formName, 'reset');
+const setFormData = (namespace, formName) =>
+  runFormMethod(namespace, formName, "setData");
+const getFormData = (namespace, formName) =>
+  runFormMethod(namespace, formName, "getData");
+const resetForm = (namespace, formName) =>
+  runFormMethod(namespace, formName, "reset");
 
-
-const isValidateSuccess = function (state, formName) {
+const isValidateSuccess = function(state, formName) {
   const formValidateData = getFormValidateData(state, formName);
   let result = true;
   for (let field in formValidateData) {
     const fieldValidateData = formValidateData[field];
     if (result && fieldValidateData) {
-      result = fieldValidateData.status === 'error';
+      result = fieldValidateData.status === "error";
     }
   }
 
   return result;
-}
+};
 
 class Form extends React.Component {
   static propTypes = {
@@ -61,6 +67,13 @@ class Form extends React.Component {
     onSubmit: PropTypes.func,
     dispatch: PropTypes.func
   };
+
+  constructor(props) {
+    super(props);
+
+    this.fieldList = [];
+    this.fieldTypeMap = {};
+  }
 
   dispatch(action) {
     const dispatch = this.props.dispatch || this.context.dispatch;
@@ -82,7 +95,7 @@ class Form extends React.Component {
   getFieldDisplayData(field) {
     const { name: formName } = this.props;
     const state = this.getState();
-    return getFieldDisplayData(state, formName, field)
+    return getFieldDisplayData(state, formName, field);
   }
   /**
    * 根据字段名称，获取字段的校验数据
@@ -95,17 +108,21 @@ class Form extends React.Component {
   }
   /**
    * 字段值发生变化时触发
-   * @param {String} field 字段名称
+   * @param {String} field 字段名称，表单内不可重复
    * @param {String} value 值
+   * @param {String} fieldType 字段类型，表单内可重复
    */
-  onFieldChange(field, value) {
+  onFieldChange({field, value, fieldType}) {
     const { name: formName } = this.props;
 
     this.dispatch({
       type: XFORM_FIELD_CHANGE,
       payload: {
-        field, value, formName,
-      },
+        field,
+        fieldType,
+        value,
+        formName
+      }
     });
   }
   /**
@@ -123,18 +140,16 @@ class Form extends React.Component {
     const Model = KOS.getModel(namespace);
 
     const initialModel = Model.getInitial();
-    this.setData({
-      [formName]: {
-        ...initialModel[formName]
-      }
-    });
+    this.setData(initialModel[formName]);
   }
   setData(formData) {
     const { name: formName } = this.props;
 
     this.dispatch({
-      type: 'setState',
-      payload: formData
+      type: "setState",
+      payload: {
+        [formName]: formData
+      }
     });
   }
   /**
@@ -147,31 +162,50 @@ class Form extends React.Component {
   }
   validate(callback) {
     const { name: formName } = this.props;
+    const { fieldTypeMap, fieldList } = this;
     this.dispatch({
       type: XFORM_VALIDATE,
       payload: {
         formName,
+        fieldTypeMap,
+        fieldList,
         callback
       }
     });
   }
   onSubmit() {
     const { onSubmit } = this.props;
-    
-    this.validate((result) => {
+
+    this.validate(result => {
       const formData = this.getData();
       result && onSubmit && onSubmit(formData);
     });
 
     return false;
   }
+  registerField(field, fieldType) {
+    this.fieldList.push(field);
 
+    if (fieldType) {
+      this.fieldTypeMap[field] = fieldType;
+    }
+  }
+  revokeField(field) {
+    const index = this.fieldList.indexOf(field);
+    if (index > -1) {
+      this.fieldList.splice(index, 1);
+    }
+
+    delete this.fieldTypeMap[field];
+  }
   getChildContext() {
     return {
+      registerField: this.registerField.bind(this),
+      revokeField: this.revokeField.bind(this),
       onFieldChange: this.onFieldChange.bind(this),
       getFieldValue: this.getFieldValue.bind(this),
       getFieldVaidateData: this.getFieldVaidateData.bind(this),
-      getFieldDisplayData: this.getFieldDisplayData.bind(this),
+      getFieldDisplayData: this.getFieldDisplayData.bind(this)
     };
   }
   componentDidMount() {
@@ -186,32 +220,38 @@ class Form extends React.Component {
 
   render() {
     const { children } = this.props;
-    return (<form onSubmit={() => { return this.onSubmit(); }}>
-      {children}
-    </form>);
+    return (
+      <form
+        onSubmit={() => {
+          return this.onSubmit();
+        }}
+      >
+        {children}
+      </form>
+    );
   }
 }
 
 // 传递给field用的
 Form.childContextTypes = {
+  registerField: PropTypes.func,
+  revokeField: PropTypes.func,
   onFieldChange: PropTypes.func,
   getFieldValue: PropTypes.func,
   getFieldVaidateData: PropTypes.func,
-  getFieldDisplayData: PropTypes.func,
+  getFieldDisplayData: PropTypes.func
 };
-
 
 // 来自wrapper
 Form.contextTypes = {
   dispatch: PropTypes.func,
   getState: PropTypes.func,
-  getNamespace: PropTypes.func,
+  getNamespace: PropTypes.func
 };
 
 Form.getForm = getForm;
 Form.getFormData = getFormData;
 Form.resetForm = resetForm;
 Form.validate = validate;
-
 
 export default Form;

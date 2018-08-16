@@ -1,7 +1,7 @@
-import KOS from 'kos-core';
-import Validator from './validator';
+import KOS from "kos-core";
+import Validator from "./validator";
 
-import { createValidatePayload } from '../data-util';
+import { createValidatePayload } from "../data-util";
 
 const KOSUtil = KOS.Util;
 
@@ -16,16 +16,17 @@ const getModelValidatorIns = (model, formName) => {
 
   // 此处有性能优化的空间，如果一个Model下存在多个formName的时候
   if (!validatorMap) {
-    const validatorConfig = model.getAttr('validators');
-    model.validatorMap = validatorMap = validatorConfig ? Validator.create(validatorConfig, namespace) : {};
+    const validatorConfig = model.getAttr("validators");
+    model.validatorMap = validatorMap = validatorConfig
+      ? Validator.create(validatorConfig, namespace)
+      : {};
   }
 
   return validatorMap[formName];
 };
 
-
 /**
- * 
+ *
  * @param {Function} dispatch dispatch方法，包装了namesapce的
  * @param {Function} getState 获取当前namespace下的getState方法
  * @param {Object} action 包含type、payload的对象实体
@@ -45,16 +46,16 @@ export const fieldValidateMiddleware = async (dispatch, getState, action) => {
 
     // 触发表单校验结果更新
     dispatch({
-      type: 'setState',
-      payload: createValidatePayload(payload, getState, fieldResult),
+      type: "setState",
+      payload: createValidatePayload(payload, getState, fieldResult)
     });
 
     return fieldResult;
   }
-}
+};
 
 /**
- * 
+ *
  * @param {Function} dispatch dispatch方法，包装了namesapce的
  * @param {Function} getState 获取当前namespace下的getState方法
  * @param {Object} action 包含type、payload的对象实体
@@ -68,17 +69,17 @@ export const formValidateMiddleware = async (dispatch, getState, action) => {
   const validatorIns = getModelValidatorIns(model, formName);
   let formResult = true;
   if (validatorIns) {
-    const result = await validatorIns.runAll(getState);
+    const result = await validatorIns.runAll(payload, getState);
     formResult = result.formResult;
 
     // 触发表单校验结果更新
     dispatch({
-      type: 'setState',
-      payload: createValidatePayload(payload, getState, result.fieldResult),
+      type: "setState",
+      payload: createValidatePayload(payload, getState, result.fieldResult)
     });
   }
 
   // 校验后进行回调
   const { callback } = payload;
   callback && callback(formResult);
-}
+};
