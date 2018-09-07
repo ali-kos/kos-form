@@ -1,5 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
+import KOS from "kos-core";
+
 import {
   getFieldValidateData,
   getFieldDisplayData,
@@ -274,5 +276,13 @@ Form.getForm = getForm;
 Form.getFormData = getFormData;
 Form.resetForm = resetForm;
 Form.validate = validate;
+
+KOS.wrapperProps({
+  getForm(formName) {
+    const namespace = this.getNamespace();
+
+    return Form.getForm(namespace, formName);
+  }
+});
 
 export default Form;
