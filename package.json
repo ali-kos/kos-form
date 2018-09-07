@@ -1,6 +1,6 @@
 {
   "name": "kos-form",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "keywords": [
     "kos",
     "kos-core",
@@ -17,6 +17,9 @@
     "build": "rm -rf lib && rollup -c",
     "build-win": "rollup -c",
     "pub": "npm run build && npm publish && rm -rf lib"
+  },
+  "publishConfig": {
+    "registry": "http://registry.npm.alibaba-inc.com"
   },
   "main": "lib/index.js",
   "module": "lib/index.es.js",

@@ -1,25 +1,27 @@
-import KOS from 'kos-core';
+import KOS from "kos-core";
 
-import { XFORM_FIELD_CHANGE, XFORM_VALIDATE } from './const';
-import { createFieldValuePayload } from './data-util';
-import FormValidator from './form-validator/index';
-import FieldDiaplay from './field-display/index';
-
+import {
+  XFORM_FIELD_CHANGE,
+  XFORM_VALIDATE,
+  XFORM_FIELD_VALIDATE
+} from "./const";
+import { createFieldValuePayload } from "./data-util";
+import FormValidator from "./form-validator/index";
+import FieldDiaplay from "./field-display/index";
 
 const { fieldDisplayMiddleware } = FieldDiaplay;
 const { fieldValidateMiddleware, formValidateMiddleware } = FormValidator;
 const KOSUtil = KOS.Util;
 
-
 const fieldChangeHandlers = [];
-const FormMiddleware = store => next => async (action) => {
+const FormMiddleware = store => next => async action => {
   const { namespace, type } = KOSUtil.getActionType(action.type);
   const getState = () => store.getState()[namespace];
-  const dispatch = (action) => {
+  const dispatch = action => {
     const { type } = action;
     store.dispatch({
       ...action,
-      type: `${namespace}/${type}`,
+      type: `${namespace}/${type}`
     });
   };
 
@@ -29,13 +31,26 @@ const FormMiddleware = store => next => async (action) => {
     case XFORM_FIELD_CHANGE:
       // 更新值
       dispatch({
-        type: 'setState',
-        payload: createFieldValuePayload(action.payload, getState),
+        type: "setState",
+        payload: createFieldValuePayload(action.payload, getState)
       });
 
-      fieldChangeHandlers.forEach((handler) => {
+      fieldChangeHandlers.forEach(handler => {
         handler(dispatch, getState, action);
       });
+      break;
+    case XFORM_FIELD_VALIDATE:
+      const { field, formName, callback } = action.payload;
+      const formData = getState()[formName] || {};
+
+      fieldValidateMiddleware(dispatch, getState, {
+        type: action.type,
+        payload: {
+          value: formData[field],
+          ...action.payload
+        }
+      });
+
       break;
     case XFORM_VALIDATE:
       await formValidateMiddleware(dispatch, getState, action);
@@ -43,11 +58,9 @@ const FormMiddleware = store => next => async (action) => {
   }
 };
 
-
-FormMiddleware.addFieldChangeHandler = (handler) => {
+FormMiddleware.addFieldChangeHandler = handler => {
   handler && fieldChangeHandlers.push(handler);
 };
-
 
 // 添加
 FormMiddleware.addFieldChangeHandler(fieldDisplayMiddleware);

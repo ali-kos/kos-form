@@ -7,7 +7,11 @@ import {
   createFormDataPayload
 } from "../data-util";
 
-import { XFORM_FIELD_CHANGE, XFORM_VALIDATE } from "../const";
+import {
+  XFORM_FIELD_CHANGE,
+  XFORM_VALIDATE,
+  XFORM_FIELD_VALIDATE
+} from "../const";
 
 const formInsMap = {};
 const addForm = ins => {
@@ -112,7 +116,7 @@ class Form extends React.Component {
    * @param {String} value 值
    * @param {String} fieldType 字段类型，表单内可重复
    */
-  onFieldChange({field, value, fieldType}) {
+  onFieldChange({ field, value, fieldType }) {
     const { name: formName } = this.props;
 
     this.dispatch({
@@ -160,6 +164,9 @@ class Form extends React.Component {
     const formData = this.getData();
     return formData[field];
   }
+  /**
+   * 执行全表单校验
+   */
   validate(callback) {
     const { name: formName } = this.props;
     const { fieldTypeMap, fieldList } = this;
@@ -169,6 +176,20 @@ class Form extends React.Component {
         formName,
         fieldTypeMap,
         fieldList,
+        callback
+      }
+    });
+  }
+  validateField(field, callback) {
+    const { name: formName } = this.props;
+    const value = this.getFieldValue(field);
+
+    this.dispatch({
+      type: XFORM_FIELD_VALIDATE,
+      payload: {
+        field,
+        formName,
+        value,
         callback
       }
     });

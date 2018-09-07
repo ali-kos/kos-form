@@ -37,21 +37,28 @@ export const fieldValidateMiddleware = async (dispatch, getState, action) => {
   const { payload } = action;
   const { formName, field } = payload;
 
+  let result = null;
+
   // 有表单校验相关配置
   const validatorIns = getModelValidatorIns(model, formName);
   if (validatorIns) {
-    const result = await validatorIns.run(payload, getState);
-    const fieldResult = {};
-    fieldResult[field] = result;
+    result = await validatorIns.run(payload, getState);
+    // const fieldResult = {};
+    // fieldResult[field] = result;
 
     // 触发表单校验结果更新
     dispatch({
       type: "setState",
-      payload: createValidatePayload(payload, getState, fieldResult)
+      payload: createValidatePayload(payload, getState, {
+        [field]: result
+      })
     });
-
-    return fieldResult;
   }
+  // 校验后进行回调
+  const { callback } = payload;
+  callback && callback(result);
+
+  return result;
 };
 
 /**
@@ -82,4 +89,6 @@ export const formValidateMiddleware = async (dispatch, getState, action) => {
   // 校验后进行回调
   const { callback } = payload;
   callback && callback(formResult);
+
+  return formResult;
 };
