@@ -32,7 +32,7 @@
     "react-redux": "^5.0.7",
     "redux": "3"
   },
-  "peerDependencies":{
+  "peerDependencies": {
     "kos-core": "*"
   },
   "devDependencies": {
