@@ -20,3 +20,9 @@
 
 * 提供form.validateField能力
 * 注入到kos.wrapper的component内this.props.getForm(formName)能力
+
+
+
+## v1.2.2
+
+* 解决kos-core安装的依赖问题
