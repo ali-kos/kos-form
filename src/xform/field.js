@@ -5,7 +5,10 @@ export default ({ FieldWrapper, FieldProps }) => {
   class Field extends React.PureComponent {
     static defaultProps = {
       getOnChangeValue: e => {
-        return e.target.value;
+        if(e&&e.target){
+          return e.target.value;
+        }
+        return e;
       }
     };
     static propTypes = {

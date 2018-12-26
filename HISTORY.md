@@ -26,3 +26,9 @@
 ## v1.2.2
 
 * 解决kos-core安装的依赖问题
+
+
+
+## v1.2.3
+
+* 修复getOnChangeValue经常性报错的问题
