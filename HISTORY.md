@@ -32,3 +32,8 @@
 ## v1.2.3
 
 * 修复getOnChangeValue经常性报错的问题
+
+
+## v1.2.5
+
+* 修复getOnChangeValue经常性报错的问题

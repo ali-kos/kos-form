@@ -245,6 +245,7 @@ class Form extends React.Component {
     const { children } = this.props;
     return (
       <form
+        {...this.props}
         onSubmit={() => {
           return this.onSubmit();
         }}
