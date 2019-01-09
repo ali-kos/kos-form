@@ -1,5 +1,5 @@
-import $ from 'lodash';
-import { getValidateHelp } from './validator-help';
+import $ from "lodash";
+import { getValidateHelp } from "./validator-help";
 
 /**
  * 支持的校验配置规则：
@@ -34,19 +34,19 @@ const RuleParseUtil = {
     if (!rule) {
       return [];
     }
-    rule = rule.split(';');
+    rule = rule.split(";");
     const list = [];
 
     rule.forEach(item => {
-      const [express, help] = item.split('@');
-      const [name, data] = express.split(':');
+      const [express, help] = item.split("@");
+      const [name, data] = express.split(":");
       const v = {
         ...getRule(name)
       };
 
       // 转换成数组
       if (data) {
-        v.data = data.split(',');
+        v.data = data.split(",");
       }
       if (help) {
         v.help = help;
@@ -59,13 +59,13 @@ const RuleParseUtil = {
   },
   functionParser(validator) {
     return {
-      name: 'fn',
+      name: "fn",
       fn: validator
     };
   },
   regexpParser(validator) {
     return {
-      ...getRule('regexp'),
+      ...getRule("regexp"),
       data: validator
     };
   },
@@ -76,16 +76,21 @@ const RuleParseUtil = {
       return {
         ...getRule(name),
         ...validator
-      }
+      };
     }
 
     return {
-      name: 'custome',
+      name: "custome",
       ...validator
-    }
+    };
   }
-}
+};
 
+/**
+ * 解析校验规则
+ * @param {String|Function|RegExp|Object} rule 校验规则
+ * @param {String|Object} custHelp 自定义文案
+ */
 export const parseRule = (rule, custHelp) => {
   let v = null;
   if ($.isString(rule)) {
@@ -105,7 +110,16 @@ export const parseRule = (rule, custHelp) => {
   return v;
 };
 
-export const parseValidatorRules = (validatorItem) => {
+/**
+ * 解析校验规则，可以一次解析多个
+ * @param {Object} validatorItem
+ * @example
+ * {
+ *  field:'',
+ *  rules:['required',(value)=>{return value>10},/d+/g]
+ * }
+ */
+export const parseValidatorRules = validatorItem => {
   const { field, help } = validatorItem;
   let list = [];
   const rules = [].concat(validatorItem.rules);
@@ -118,16 +132,33 @@ export const parseValidatorRules = (validatorItem) => {
 };
 
 const validatorsMap = {};
+
+/**
+ *
+ * @param {String} name rule名称
+ * @param {Function} fn 校验函数
+ * @param {String|Object} help 帮助信息
+ */
 export const addRule = (name, fn, help) => {
   validatorsMap[name] = {
-    name, fn, help,
+    name,
+    fn,
+    help
   };
 };
 
-export const removeRule = (name) => {
+/**
+ * 根据名称移除rule规则
+ * @param {String} name rule名称
+ */
+export const removeRule = name => {
   delete validatorsMap[name];
 };
 
+/**
+ * 根据名称获取rule规则
+ * @param {String} name rule名称
+ */
 export const getRule = name => validatorsMap[name];
 
 /**
@@ -137,21 +168,20 @@ export const getRule = name => validatorsMap[name];
  * @param {Object} state 当前namespace下的Model
  */
 export const runRule = async (validator, payload, getState) => {
-  const {
-    fn, help, data,
-  } = validator;
+  const { fn, help, data } = validator;
   const { field, value, formName } = payload;
 
   const result = await fn(getState, { value, field, formName }, data);
 
-  let validateStatus = 'success';
-  let runnerHelp = '';
+  let validateStatus = "success";
+  let runnerHelp = "";
   if ($.isBoolean(result)) {
-    validateStatus = result ? 'success' : 'error';
-  } else if ($.isString(result)) { // 返回的是错误消息
+    validateStatus = result ? "success" : "error";
+  } else if ($.isString(result)) {
+    // 返回的是错误消息
     runnerHelp = result;
     if (result) {
-      validateStatus = result ? 'error' : 'success';
+      validateStatus = result ? "error" : "success";
     }
   } else if ($.isObject(result)) {
     return result;
@@ -160,7 +190,7 @@ export const runRule = async (validator, payload, getState) => {
   const fieldResult = {
     validateStatus,
     hasFeedback: true,
-    help: runnerHelp || getValidateHelp(help, validateStatus, data),
+    help: runnerHelp || getValidateHelp(help, validateStatus, data)
   };
 
   return fieldResult;

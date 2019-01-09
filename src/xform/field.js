@@ -13,15 +13,14 @@ export default ({ FieldWrapper, FieldProps }) => {
     };
     static propTypes = {
       field: PropTypes.string,
-      fieldType: PropTypes.string
+      fieldType: PropTypes.string,
+      validator: PropTypes.any,
+      getOnChangeValue: PropTypes.func
     };
     constructor(props) {
       super(props);
 
       this.state = {};
-
-      this.onFieldChange = this.fieldChange.bind(this);
-      this.getFieldValue = this.getValue.bind(this);
     }
     componentDidMount() {
       const { fieldType, field } = this.props;
@@ -31,7 +30,7 @@ export default ({ FieldWrapper, FieldProps }) => {
       const { fieldType, field } = this.props;
       this.context && this.context.revokeField(field, fieldType);
     }
-    getValue() {
+    getFieldValue() {
       const { field } = this.props;
 
       return this.isOnComposition
@@ -46,8 +45,7 @@ export default ({ FieldWrapper, FieldProps }) => {
       const { field } = this.props;
       return this.context.getFieldDisplayData(field) === false ? false : true;
     }
-    fieldChange(onChange) {
-      var _this = this;
+    onFieldChange(onChange) {
       return function(e) {
         const { field, getOnChangeValue, fieldType } = this.props;
         const value = getOnChangeValue.apply(this, arguments);
@@ -58,12 +56,21 @@ export default ({ FieldWrapper, FieldProps }) => {
             inputValue: value
           });
         } else {
+          // 是input，记录input的光标的位置
+          if (e.target instanceof HTMLInputElement) {
+            this.inputSelection = {
+              start: e.target.selectionStart,
+              end: e.target.selectionEnd
+            };
+            this.inputTarget = e.target;
+          }
+
           onChange && onChange.apply(this, arguments);
-          this.context.onFieldChange({ field, value, fieldType });
+          this.context.onFieldChange({ field, value, fieldType }, e);
         }
       }.bind(this);
     }
-    onCompositionHandler(type, e) {
+    onCompositionHandler(type, onChange, e) {
       switch (type) {
         case "start":
           this.isOnComposition = true;
@@ -74,9 +81,29 @@ export default ({ FieldWrapper, FieldProps }) => {
         case "end":
           this.isOnComposition = false;
           if (e.target instanceof HTMLInputElement && !this.isOnComposition) {
-            this.onChange(e);
+            this.onFieldChange(onChange)(e);
           }
           break;
+      }
+    }
+    onFocus() {}
+    onKeyDown() {}
+    onKeyUp() {}
+    onBlur() {}
+    componentDidUpdate(prevProps) {
+      // const { value } = prevProps;
+      const value = this.getFieldValue();
+      const { inputSelection, inputTarget } = this;
+      if (inputSelection && inputTarget) {
+        // 在 didUpdate 时根据情况恢复光标的位置
+        // 如果光标的位置小于值的长度，那么可以判定属于中间编辑的情况
+        // 此时恢复光标的位置
+        if (inputSelection.start < value.length) {
+          inputTarget.selectionStart = inputSelection.start;
+          inputTarget.selectionEnd = inputSelection.end;
+          this.inputSelection = null;
+          this.inputTarget = null;
+        }
       }
     }
     render() {
@@ -94,21 +121,34 @@ export default ({ FieldWrapper, FieldProps }) => {
         ...validateData
       };
 
+      const { onCompositionHandler } = this;
+      const value = this.getFieldValue();
+
       return (
         <FieldWrapper {...fieldProps}>
-          {React.Children.map(children, child => {
+          {React.Children.map(children, (child, index) => {
             const { onChange } = child.props;
-            this.onChange = this.onFieldChange(onChange);
+
+            const onFieldChange = this.onFieldChange(onChange);
             const props = {
               ...child.props,
-              onChange: this.onChange,
-              onCompositionStart: this.onCompositionHandler.bind(this, "start"),
-              onCompositionUpdate: this.onCompositionHandler.bind(
+              value,
+              onChange: onFieldChange,
+              onFocus: this.onFocus,
+              onBlur: this.onBlur,
+              onKeyDown: this.onKeyDown,
+              onKeyUp: this.onKeyUp,
+              onCompositionStart: onCompositionHandler.bind(
                 this,
-                "update"
+                "start",
+                onChange
               ),
-              onCompositionEnd: this.onCompositionHandler.bind(this, "end"),
-              value: this.getFieldValue()
+              onCompositionUpdate: onCompositionHandler.bind(
+                this,
+                "update",
+                onChange
+              ),
+              onCompositionEnd: onCompositionHandler.bind(this, "end", onChange)
             };
             return React.createElement(child.type, props);
           })}
