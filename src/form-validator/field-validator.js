@@ -2,48 +2,43 @@ import { parseValidatorRules, runRule } from "./validator-rule";
 import { getFieldDisplayData } from "../data-util";
 
 class FieldValidator {
-  constructor(field, validators) {
+  constructor(field, rules) {
     this.field = field;
-    this.validators = validators;
     this.disabled = false;
-
-    this.list = this.initValidator(validators);
+    this.initRules(rules);
   }
-  initValidator(validators) {
+  initRules(rules) {
     let list = [];
-    validators.forEach(item => {
+    rules.forEach(item => {
       list = list.concat(item);
     });
-    return list;
+    this.rules = list;
   }
-  setDisable() {
+  setDisable(disable = true) {
     this.disabled = true;
   }
-  setEnable() {
-    this.disabled = false;
-  }
-  isDisable(state, formName, field) {
-    return getFieldDisplayData(state, formName, field);
-  }
-  async run(payload, getState) {
-    // TODO：如果表单为隐藏的，则不执行校验器，这部分逻辑有耦合
-    const { formName, field } = payload;
-    const state = getState();
-    const disable = this.isDisable(state, formName, field);
-    if (disable === false) {
-      return validateResult;
-    }
+  setRuleDisable(disabled, name) {
+    const isNumber = typeof name === "number";
 
+    this.rules.forEach((rule, index) => {
+      if (isNumber && index === name) {
+        rule.disabled = disabled;
+      } else if (rule.name === name) {
+        rule.disabled = disabled;
+      }
+    });
+  }
+  async run(dispatch, getState, payload) {
     let validateResult = null;
-    const { list } = this;
-    for (let i = 0, len = list.length; i < len; i++) {
-      const validator = list[i];
+    const { rules } = this;
+    for (let i = 0, len = rules.length; i < len; i++) {
+      const rule = rules[i];
 
-      if (validator && validator.fn) {
-        const result = await runRule(validator, payload, getState);
+      if (rule && rule.fn && !rule.disabled) {
+        const result = await runRule(dispatch, getState, payload, rule);
 
         // 遇到错误，立刻退出
-        if (result.validateStatus === "error") {
+        if (result && result.validateStatus === "error") {
           validateResult = result;
           break;
         }
@@ -57,18 +52,19 @@ class FieldValidator {
 FieldValidator.factory = validators => {
   const vas = {};
 
-  validators.forEach(validatorItem => {
-    const { field } = validatorItem;
-    const list = parseValidatorRules(validatorItem);
+  validators.forEach(fieldValidator => {
+    const { field } = fieldValidator;
+    const rules = parseValidatorRules(fieldValidator);
 
     vas[field] = vas[field] || [];
-    vas[field] = vas[field].concat(list);
+    vas[field] = vas[field].concat(rules);
   });
 
   // 转换成对象进行管理
   for (const field in vas) {
-    if (field) {
-      vas[field] = new FieldValidator(field, vas[field]);
+    const rules = vas[field];
+    if (field && rules) {
+      vas[field] = new FieldValidator(field, rules);
     }
   }
 

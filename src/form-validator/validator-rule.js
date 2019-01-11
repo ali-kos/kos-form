@@ -119,10 +119,10 @@ export const parseRule = (rule, custHelp) => {
  *  rules:['required',(value)=>{return value>10},/d+/g]
  * }
  */
-export const parseValidatorRules = validatorItem => {
-  const { field, help } = validatorItem;
+export const parseValidatorRules = fieldValidator => {
+  const { field, help } = fieldValidator;
   let list = [];
-  const rules = [].concat(validatorItem.rules);
+  const rules = [].concat(fieldValidator.rules);
 
   rules.forEach(ruleItem => {
     list = list.concat(parseRule(ruleItem, help));
@@ -163,23 +163,41 @@ export const getRule = name => validatorsMap[name];
 
 /**
  *
- * @param {Object} validator 校验器
+ * @param {Object} rule 校验器
  * @param {Object} payload 参数
  * @param {Object} state 当前namespace下的Model
  */
-export const runRule = async (validator, payload, getState) => {
-  const { fn, help, data } = validator;
-  const { field, value, formName } = payload;
+export const runRule = async (dispatch, getState, payload, rule) => {
+  const { fn, data, disabled } = rule;
+  let { help = "" } = rule;
+  if (disabled || !fn) {
+    return null;
+  }
 
-  const result = await fn(getState, { value, field, formName }, data);
+  // const { field, value, fieldType, formName } = payload;
+  /**
+   * result有几种返回结果
+   * 为undefined(包括fn无返回的情况)或者null，则表示校验规则执行失败，整体结果返回null
+   * 为true或者false，则表示校验成功或者失败，对应的validateStatus位success或者error
+   * 为字符串，当字符串为空是，表示校验通过，当字符串有内容时，表示校验失败，字符串作为错误提示信息
+   * 为对象时，包括如下字段：validateStatus,help,hasFeedback
+   */
+  const result = await fn(dispatch, getState, {
+    ...payload,
+    data
+  });
+
+  // 无任何返回或者返回undefined，不做任何处理
+  if (result === undefined || result === null) {
+    return null;
+  }
 
   let validateStatus = "success";
-  let runnerHelp = "";
   if ($.isBoolean(result)) {
     validateStatus = result ? "success" : "error";
   } else if ($.isString(result)) {
     // 返回的是错误消息
-    runnerHelp = result;
+    help = result;
     if (result) {
       validateStatus = result ? "error" : "success";
     }
@@ -187,11 +205,9 @@ export const runRule = async (validator, payload, getState) => {
     return result;
   }
 
-  const fieldResult = {
+  return {
     validateStatus,
     hasFeedback: true,
-    help: runnerHelp || getValidateHelp(help, validateStatus, data)
+    help: getValidateHelp(help, validateStatus, data)
   };
-
-  return fieldResult;
 };

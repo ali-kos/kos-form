@@ -1,32 +1,40 @@
-import Validator from './validator';
-import * as ValidatorRule from './validator-rule';
-import { fieldValidateMiddleware, formValidateMiddleware } from './middleware';
+import Validator from "./validator";
+import * as ValidatorRule from "./validator-rule";
+import { fieldValidateMiddleware, formValidateMiddleware } from "./middleware";
 
 const { addRule } = ValidatorRule;
 
-addRule('required', (getState, { value, field }, required) => {
-  return !!value;
-}, '不能为空！');
+addRule(
+  "required",
+  (dispatch, getState, { value, field, data }) => {
+    return !!value;
+  },
+  "不能为空！"
+);
 
-addRule('maxLength', (getState, { value, field }, maxLength) => {
-  if (value) {
-    return value.length <= maxLength;
+addRule(
+  "maxLength",
+  (dispatch, getState, { value, field, maxLength: data }) => {
+    if (value) {
+      return value.length <= maxLength;
+    }
+    return true;
   }
-  return true;
-});
+);
 
-addRule('minLength', (getState, { value, field }, minLength) => {
-  if (value) {
-    return value.length >= minLength;
+addRule(
+  "minLength",
+  (dispatch, getState, { value, field, minLength: data }) => {
+    if (value) {
+      return value.length >= minLength;
+    }
+    return true;
   }
-  return true;
-});
+);
 
-
-addRule('regexp', (getState, { value, field }, regExp) => {
+addRule("regexp", (dispatch, getState, { value, field, regExp: data }) => {
   return regExp.test(value);
 });
-
 
 export default {
   /**
@@ -42,5 +50,5 @@ export default {
    */
   formValidateMiddleware,
 
-  ...ValidatorRule,
+  ...ValidatorRule
 };

@@ -12,7 +12,9 @@ import {
 import {
   XFORM_FIELD_CHANGE,
   XFORM_VALIDATE,
-  XFORM_FIELD_VALIDATE
+  XFORM_FIELD_VALIDATE,
+  XFORM_FIELD_VALIDATOR_DISABLE,
+  XFORM_FIELD_VALIDATOR_RULE_DISABLE
 } from "../const";
 
 const formInsMap = {};
@@ -121,16 +123,31 @@ class Form extends React.Component {
   onFieldChange({ field, value, fieldType }) {
     const { name: formName } = this.props;
 
+    const payload = {
+      field,
+      fieldType,
+      value,
+      formName
+    };
     this.dispatch({
       type: XFORM_FIELD_CHANGE,
-      payload: {
-        field,
-        fieldType,
-        value,
-        formName
-      }
+      payload
     });
+
+    // 执行表单校验
+    if (this.fieldChangeValidateSeed) {
+      clearTimeout(this.fieldChangeValidateSeed);
+    }
+    this.fieldChangeValidateSeed = setTimeout(() => {
+      console.log('run field validate');
+      this.validateField(payload);
+    }, 300);
   }
+
+  onFieldFocus({ field, fieldType }) {}
+  onFieldBlur() {}
+  onFieldKeyUp() {}
+  onFieldDown() {}
   /**
    * 获取表单值
    */
@@ -182,17 +199,40 @@ class Form extends React.Component {
       }
     });
   }
-  validateField(field, callback) {
-    const { name: formName } = this.props;
-    const value = this.getFieldValue(field);
+  validateField({ field, fieldType, value, formName }, callback) {
+    value = value || this.getFieldValue(field);
+    formName = formName || this.props.name;
 
     this.dispatch({
       type: XFORM_FIELD_VALIDATE,
       payload: {
         field,
+        fieldType,
         formName,
         value,
         callback
+      }
+    });
+  }
+  // validateByFieldType()
+  disableFieldValidator(field, disabled) {
+    this.dispatch({
+      type: XFORM_FIELD_VALIDATOR_DISABLE,
+      payload: {
+        field,
+        formName,
+        disabled
+      }
+    });
+  }
+  disableFieldValidatorRule(field, rule, disabled) {
+    this.dispatch({
+      type: XFORM_FIELD_VALIDATOR_RULE_DISABLE,
+      payload: {
+        field,
+        formName,
+        rule,
+        disabled
       }
     });
   }

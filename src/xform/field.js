@@ -86,10 +86,14 @@ export default ({ FieldWrapper, FieldProps }) => {
           break;
       }
     }
-    onFocus() {}
-    onKeyDown() {}
-    onKeyUp() {}
-    onBlur() {}
+    onFieldFocus(onFocus) {
+      return e => {
+        onFocus && onFocus.apply(this, arguments);
+      };
+    }
+    onFieldKeyDown(onKeyDown) {}
+    onFieldKeyUp(onKeyUp) {}
+    onFieldBlur(onBlur) {}
     componentDidUpdate(prevProps) {
       // const { value } = prevProps;
       const value = this.getFieldValue();
@@ -127,17 +131,23 @@ export default ({ FieldWrapper, FieldProps }) => {
       return (
         <FieldWrapper {...fieldProps}>
           {React.Children.map(children, (child, index) => {
-            const { onChange } = child.props;
+            const {
+              onChange,
+              onFocus,
+              onBlur,
+              onKeyDown,
+              onKeyUp
+            } = child.props;
 
-            const onFieldChange = this.onFieldChange(onChange);
+            // const onFieldChange = this.onFieldChange(onChange);
             const props = {
               ...child.props,
               value,
-              onChange: onFieldChange,
-              onFocus: this.onFocus,
-              onBlur: this.onBlur,
-              onKeyDown: this.onKeyDown,
-              onKeyUp: this.onKeyUp,
+              onChange: this.onFieldChange(onChange),
+              // onFocus: this.onFieldFocus(onFocus),
+              // onBlur: this.onFieldBlur(onBlur),
+              // onKeyDown: this.onFieldKeyDown(onKeyDown),
+              // onKeyUp: this.onFieldKeyUp(onKeyUp),
               onCompositionStart: onCompositionHandler.bind(
                 this,
                 "start",

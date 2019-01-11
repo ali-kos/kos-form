@@ -53,7 +53,7 @@ class Validator {
     const { validators, formValidator } = this;
 
     // 第一层遍历formName，同一个formName可以写多个{formName,validators}的配置
-    validators.forEach((item, index) => {
+    validators.forEach(item => {
       // 兼容只有一个表单，不写表单名的情况，使用时强烈推荐定义表单名
       const { formName, validators = item } = item;
       map[formName] = map[formName] || [];
@@ -67,6 +67,10 @@ class Validator {
       formValidator[formName] = new FormValidator(validators, formName);
     }
   }
+  /**
+   * 获取表单校验实例
+   * @param {String} formName 表单名称
+   */
   getFormValidator(formName) {
     return this.formValidator[formName];
   }
