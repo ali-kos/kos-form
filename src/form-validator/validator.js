@@ -1,84 +1,79 @@
 import FieldValidator from "./field-validator";
+import FormValidator from "./form-validator";
+
+/**
+ * 工厂函数
+ * @param validatorConfig，例如
+ * 
+ * [{
+    formName: 'addForm',
+    validators: [{
+      field: 'page_type',
+      rules: 'required'
+    }, {
+      field: 'page_desc',
+      rules: ['required', (getState, { field, value }, data) => {
+        return value && value.length <= 3;
+      }],
+      help: '请正确填写'
+    }, {
+      field: 'page_name',
+      rules: ['required@好好填', {
+        name: 'maxLength',
+        data: 4,
+        help: 'maxLength:{0}'
+      }]
+    }, {
+      field: 'page_name',
+      help: '异步校验失败',
+      rules: {
+        data: { a: 1 },
+        fn: async (getState, { field, value }, data) => {
+          const xdata = await fetch({
+            url: '/app/list',
+            data: {
+            }
+          });
+
+          return true
+        }
+      }
+    }]
+  }]
+ */
 
 class Validator {
-  constructor(validators = [], namespace, formName) {
-    this.formName = formName;
-    this.namespace = namespace;
-
-    this.fieldValidateIns = FieldValidator.factory(validators);
+  constructor(validators) {
+    this.validators = validators;
+    this.formValidator = {};
+    this.init();
   }
-  getValidatorsByField(field, fieldType) {
-    return (
-      this.fieldValidateIns[field] || this.fieldValidateIns[fieldType] || null
-    );
-  }
-  async runAll(payload, getState) {
-    const { formName, fieldValidateIns } = this;
-    const state = getState();
-    const { fieldTypeMap, fieldList } = payload;
-    let formData = formName ? state[formName] : state;
-    formData = formData || {};
+  init() {
+    const map = {};
+    const { validators, formValidator } = this;
 
-    const fieldResult = {};
-    let formResult = true;
+    // 第一层遍历formName，同一个formName可以写多个{formName,validators}的配置
+    validators.forEach((item, index) => {
+      // 兼容只有一个表单，不写表单名的情况，使用时强烈推荐定义表单名
+      const { formName, validators = item } = item;
+      map[formName] = map[formName] || [];
+      map[formName] = map[formName].concat(validators);
+    });
 
-    for(const field of fieldList) {
-      const fieldType = fieldTypeMap[field];
-
-      const value = formData[field];
-      const result = await this.run(
-        {
-          field,
-          fieldType,
-          value,
-          formName
-        },
-        getState
-      );
-
-      formResult =
-        formResult && (result ? result.validateStatus !== "error" : true);
-      fieldResult[field] = result;
-    };
-
-    return {
-      formResult,
-      fieldResult
-    };
-  }
-  async run(payload, getState) {
-    const { field, fieldType } = payload;
-    const fieldValidate = this.getValidatorsByField(field, fieldType);
-
-    if (!fieldValidate) {
-      return null;
+    // 根据formName的情况，进行校验规则的实例化
+    for (const formName in map) {
+      const validators = map[formName];
+      // 初始化
+      formValidator[formName] = new FormValidator(validators, formName);
     }
-
-    return fieldValidate.run(payload, getState);
+  }
+  getFormValidator(formName) {
+    return this.formValidator[formName];
   }
 }
 
-Validator.create = (validatorConfig, namespace) => {
-  const map = {};
-  const validatorMap = {};
-  validatorConfig.forEach(item => {
-    const { formName, validators } = item;
-
-    let fvList = map[formName] || [];
-    if (validators) {
-      fvList = fvList.concat(validators);
-    } else {
-      fvList = fvList.concat(item);
-    }
-    map[formName] = fvList;
-  });
-
-  for (const formName in map) {
-    // 初始化
-    validatorMap[formName] = new Validator(map[formName], namespace, formName);
-  }
-
-  return validatorMap;
+Validator.create = validators => {
+  return new Validator(validators);
 };
 
 export default Validator;
