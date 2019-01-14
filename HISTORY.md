@@ -2,45 +2,47 @@
 
 ## v1.0.0
 
-* 升级kos-core至1.0.0版本；
-* 适配model.validators不配置的情况；
-* 提供Field的getOnChangeValue的props提供，解决非标准的onChange返回情况
-
+- 升级 kos-core 至 1.0.0 版本；
+- 适配 model.validators 不配置的情况；
+- 提供 Field 的 getOnChangeValue 的 props 提供，解决非标准的 onChange 返回情况
 
 ## v1.0.1
 
-* 修复input,testarea等组件输入中文的bug
+- 修复 input,testarea 等组件输入中文的 bug
 
 ## v1.0.2
 
-* 修复setData方法错误
-
+- 修复 setData 方法错误
 
 ## v1.2.1
 
-* 提供form.validateField能力
-* 注入到kos.wrapper的component内this.props.getForm(formName)能力
-
-
+- 提供 form.validateField 能力
+- 注入到 kos.wrapper 的 component 内 this.props.getForm(formName)能力
 
 ## v1.2.2
 
-* 解决kos-core安装的依赖问题
-
-
+- 解决 kos-core 安装的依赖问题
 
 ## v1.2.3
 
-* 修复getOnChangeValue经常性报错的问题
-
-
-## v1.2.5
-
-* 修复getOnChangeValue经常性报错的问题
-
+- 修复 getOnChangeValue 经常性报错的问题
 
 ## v1.2.5
 
-* 修复input输入框在中间输入时，光标定位错误的bug
-* 格式化validate-rule.js的代码，添加备注
-* field组件进行了简单优化，并添加了一些钩子（以备后用）
+- 修复 getOnChangeValue 经常性报错的问题
+
+## v1.2.5
+
+- 修复 input 输入框在中间输入时，光标定位错误的 bug
+- 格式化 validate-rule.js 的代码，添加备注
+- field 组件进行了简单优化，并添加了一些钩子（以备后用）
+
+## v2.0.0
+
+本期为不兼容升级
+
+- 调整了校验规则的的 fn 参数，改为：`(dispatch,getState,payload)=>{}`，其中 payload 包含`{value,field,fieldType,formName,data}`
+- 支持校验方法体内，通过 `dispatch` 方法修改校验状态，实现异步状态的校验中的效果，详细使用方式见文档
+- 调整了 `validate` 触发的时机，在 `Form.prototype.onFieldChange` 中去触发，解耦 `onChange` 事件
+- 提供禁用字段校验规则的能力
+- 提供禁用字段指定校验规则的能力

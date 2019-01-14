@@ -129,19 +129,21 @@ class Form extends React.Component {
       value,
       formName
     };
+    // 受控组件：传递值
     this.dispatch({
       type: XFORM_FIELD_CHANGE,
       payload
     });
 
-    // 执行表单校验
+    // 执行表单校验，连续操作只触发一次校验
     if (this.fieldChangeValidateSeed) {
       clearTimeout(this.fieldChangeValidateSeed);
     }
     this.fieldChangeValidateSeed = setTimeout(() => {
-      console.log('run field validate');
       this.validateField(payload);
-    }, 300);
+    }, 400);
+
+
   }
 
   onFieldFocus({ field, fieldType }) {}
