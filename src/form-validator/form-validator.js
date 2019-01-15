@@ -26,24 +26,46 @@ class FormValidator {
   getValidatorByFieldType(fieldType) {
     return this.fieldValidateIns[fieldType];
   }
+  /**
+   * 禁用指定字段的校验规则
+   * @param {String} field 字段名
+   * @param {Boolean} disable 是否禁用
+   */
   disableValidatorByField(field, disable) {
     const validator = this.getValidatorByField(field);
     if (validator) {
       validator.setDisable(disable);
     }
   }
+  /**
+   * 根据字段类型，禁用校验规则
+   * @param {String} fieldType 字段类型
+   * @param {Boolean} disable 是否禁用
+   */
   disableValidatorByFieldType(fieldType, disable) {
     const fieldValidator = this.getValidatorByFieldType(fieldType);
     if (fieldValidator) {
       fieldValidator.setDisable(disable);
     }
   }
+  /**
+   * 禁用字段的指定校验规则
+   * @param {String} field 字段名
+   * @param {String|Number} rule 规则名称或者规则的序号
+   * @param {Boolean} disable 是否禁用
+   */
   disableValidatorRuleByField(field, rule, disable) {
     const validator = this.getValidatorByField(field);
     if (validator) {
       validator.setRuleDisable(disable);
     }
   }
+  /**
+   * 根据字段类型，禁用字段的指定校验规则
+   * @param {String} fieldType 字段类型
+   * @param {String|Number} rule 规则名称或者规则的序号
+   * @param {Boolean} disable 是否禁用
+   */
   disableValidatorRuleByFieldType(fieldType, rule, disable) {
     const fieldValidator = this.getValidatorByFieldType(fieldType);
     if (fieldValidator) {

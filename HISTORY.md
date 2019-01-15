@@ -46,3 +46,7 @@
 - 调整了 `validate` 触发的时机，在 `Form.prototype.onFieldChange` 中去触发，解耦 `onChange` 事件
 - 提供禁用字段校验规则的能力
 - 提供禁用字段指定校验规则的能力
+
+## v2.0.0
+
+- `Form.prototype.validateField` 第一个参数调整为支持String和Object

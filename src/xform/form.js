@@ -142,8 +142,6 @@ class Form extends React.Component {
     this.fieldChangeValidateSeed = setTimeout(() => {
       this.validateField(payload);
     }, 400);
-
-
   }
 
   onFieldFocus({ field, fieldType }) {}
@@ -201,22 +199,38 @@ class Form extends React.Component {
       }
     });
   }
-  validateField({ field, fieldType, value, formName }, callback) {
-    value = value || this.getFieldValue(field);
-    formName = formName || this.props.name;
+  /**
+   * 执行表单字段校验
+   * @param {String|Object} field 校验的参数
+   * @param {Function} callback 回调方法
+   */
+  validateField(field, callback) {
+    const payload = {
+      value: this.getFieldValue(field),
+      formName: this.props.name
+    };
+    if (typeof field === "object") {
+      Object.assign(payload, field);
+    } else {
+      Object.assign(payload, {
+        field,
+        fieldType: field
+      });
+    }
 
     this.dispatch({
       type: XFORM_FIELD_VALIDATE,
       payload: {
-        field,
-        fieldType,
-        formName,
-        value,
+        ...payload,
         callback
       }
     });
   }
-  // validateByFieldType()
+  /**
+   * 禁用字段校验
+   * @param {String} field 字段名
+   * @param {Boolean} disabled 是否禁用
+   */
   disableFieldValidator(field, disabled) {
     this.dispatch({
       type: XFORM_FIELD_VALIDATOR_DISABLE,
@@ -227,6 +241,12 @@ class Form extends React.Component {
       }
     });
   }
+  /**
+   * 禁用字段校验的指定规则
+   * @param {String} field 字段名
+   * @param {String} rule 校验规则，可以是校验规则名，也可以是校验规则的index，从0开始
+   * @param {Boolean} disabled 是否禁用
+   */
   disableFieldValidatorRule(field, rule, disabled) {
     this.dispatch({
       type: XFORM_FIELD_VALIDATOR_RULE_DISABLE,
