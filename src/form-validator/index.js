@@ -36,6 +36,14 @@ addRule("regexp", (dispatch, getState, { value, field, regExp: data }) => {
   return regExp.test(value);
 });
 
+addRule(
+  "email",
+  (dispatch, getState, { value, field, data }) => {
+    return /[a-z0-9-]{1,30}@[a-z0-9-]{1,65}.[a-z]{3}/.test(value);
+  },
+  "请输入正确的email地址"
+);
+
 export default {
   /**
    * 校验器类

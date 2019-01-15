@@ -219,6 +219,7 @@ class Form extends React.Component {
    * @param {Boolean} disabled 是否禁用
    */
   disableFieldValidator(field, disabled) {
+    const { name: formName } = this.props;
     this.dispatch({
       type: XFORM_FIELD_VALIDATOR_DISABLE,
       payload: {
@@ -235,6 +236,7 @@ class Form extends React.Component {
    * @param {Boolean} disabled 是否禁用
    */
   disableFieldValidatorRule(field, rule, disabled) {
+    const { name: formName } = this.props;
     this.dispatch({
       type: XFORM_FIELD_VALIDATOR_RULE_DISABLE,
       payload: {
@@ -243,6 +245,20 @@ class Form extends React.Component {
         rule,
         disabled
       }
+    });
+  }
+  clearValidate() {
+    const { name: formName } = this.props;
+    this.dispatch({
+      type: "",
+      payload: { formName }
+    });
+  }
+  clearFieldValidate() {
+    const { name: formName } = this.props;
+    this.dispatch({
+      type: "",
+      payload: { formName }
     });
   }
   onSubmit() {

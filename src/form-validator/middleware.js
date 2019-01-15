@@ -56,7 +56,7 @@ const updateFieldValidateStatus = dispatch => payload => (
 };
 
 /**
- *
+ * 字段校验中间件
  * @param {Function} dispatch dispatch方法，包装了namesapce的
  * @param {Function} getState 获取当前namespace下的getState方法
  * @param {Object} action 包含type、payload的对象实体
@@ -75,7 +75,7 @@ export const fieldValidateMiddleware = async (dispatch, getState, action) => {
   // console.log("run field validate", action);
 
   if (validatorIns) {
-    result = await validatorIns.run(
+    result = await validatorIns.validateField(
       updateFieldValidateStatus(fieldValidateStatusDispatch)(payload), // 返回一个只能执行更新字段校验信息的dispatch方法
       getState,
       payload
@@ -91,10 +91,10 @@ export const fieldValidateMiddleware = async (dispatch, getState, action) => {
 };
 
 /**
- *
+ * 表单校验中间件
  * @param {Function} dispatch dispatch方法，包装了namesapce的
  * @param {Function} getState 获取当前namespace下的getState方法
- * @param {Object} action 包含type、payload的对象实体
+ * @param {Object} action 包含type、payload的对象实体，payload的
  */
 export const formValidateMiddleware = async (dispatch, getState, action) => {
   const { namespace } = KOSUtil.getActionType(action.type);
@@ -110,7 +110,7 @@ export const formValidateMiddleware = async (dispatch, getState, action) => {
       dispatch,
       getState
     );
-    const result = await validatorIns.runAll(
+    const result = await validatorIns.validate(
       updateFieldValidateStatus(fieldValidateStatusDispatch),
       getState,
       payload
@@ -131,37 +131,46 @@ export const formValidateMiddleware = async (dispatch, getState, action) => {
   return formResult;
 };
 
-export const fieldValidatorDisableMiddleware = (dispatch, getState, action) => {
+/**
+ * 禁止字段所有校验规则的中间件
+ * @param {Function} dispatch dispatch方法，包装了namesapce的
+ * @param {Function} getState 获取当前namespace下的getState方法
+ * @param {Object} action action.payload格式如：{ formName, field, disable }
+ */
+export const disableFieldValidatorMiddleware = (dispatch, getState, action) => {
   const { namespace, type } = KOSUtil.getActionType(action.type);
-  const { formName, field, vField, disable } = action.payload;
+  const { formName, field, disable } = action.payload;
   const model = KOS.getModel(namespace);
 
   const validatorIns = getFormValidator(model, formName);
   if (validatorIns) {
     const formValidatorIns = validatorIns.getFormValidator(formName);
-    if (field) {
-      formValidatorIns.disableValidatorByField(field, disable);
-    } else if (vField) {
-      formValidatorIns.disableValidatorByVField(vField, disable);
+    if (formValidatorIns && field) {
+      formValidatorIns.disableFieldValidator(field, disable);
     }
   }
 };
 
-export const fieldValidatorRuleDisableMiddleware = (
+/**
+ * 禁止字段指定校验规则的中间件
+ * @param {Function} dispatch dispatch方法，包装了namesapce的
+ * @param {Function} getState 获取当前namespace下的getState方法
+ * @param {Object} action action.payload格式如：{ formName, field, rule, disable }
+ */
+export const disableFieldValidatorRuleMiddleware = (
   dispatch,
   getState,
   action
 ) => {
   const { namespace, type } = KOSUtil.getActionType(action.type);
-  const { formName, field, vField, rule, disable } = action.payload;
+  const { formName, field, rule, disable } = action.payload;
+  const model = KOS.getModel(namespace);
 
   const validatorIns = getFormValidator(model, formName);
   if (validatorIns) {
     const formValidatorIns = validatorIns.getFormValidator(formName);
-    if (field) {
-      formValidatorIns.disableValidatorByField(field, disable);
-    } else if (vField) {
-      formValidatorIns.disableValidatorByVField(field, disable);
+    if (formValidatorIns && field && rule) {
+      formValidatorIns.disableFieldValidatorRule(field, rule, disable);
     }
   }
 };

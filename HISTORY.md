@@ -50,3 +50,4 @@
 ## v2.0.0
 
 - `Form.prototype.validateField` 第一个参数调整为支持String和Object
+- 新增email校验规则

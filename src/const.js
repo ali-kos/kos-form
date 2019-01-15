@@ -19,6 +19,25 @@ export const XFORM_FIELD_VISIBLE = "@@xform-field-visible";
 export const XFORM_FIELD_VALIDATOR_DISABLE = "@@xform-field-validate-disable";
 
 /**
+ * 禁用字段的校验规则
+ */
+export const XFORM_FIELD_VALIDATOR_DISABLE = "@@xform-field-validate-disable";
+
+
+/**
+ * 清除表单的校验
+ */
+export const XFORM_CLEAR_VALIDATE = "@@xform-clear-validate";
+
+
+/**
+ * 清除表单字段的校验
+ */
+export const XFORM_CLEAR_FIELD_VALIDATE = "@@xform-clear-field-validate";
+
+
+
+/**
  * 禁用字段校验的指定rule
  */
 export const XFORM_FIELD_VALIDATOR_RULE_DISABLE =

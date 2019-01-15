@@ -10,42 +10,24 @@ class FormValidator {
     this.formName = formName;
 
     // 实例化字段的校验规则
-    this.fieldValidateIns = FieldValidator.factory(validators);
+    this.fieldValidatorMap = FieldValidator.factory(validators);
   }
   /**
    * 根据字段名，获取校验规则
    * @param {String} field 字段名
    */
-  getValidatorByField(field) {
-    return this.fieldValidateIns[field];
-  }
-  /**
-   * 根据字段类型，获取校验规则
-   * @param {String} vField 字段类型，可以用于多个字段使用同一个字段类型的场景
-   */
-  getValidatorByVField(vField) {
-    return this.fieldValidateIns[vField];
+  getFieldValidator(field) {
+    return this.fieldValidatorMap[field];
   }
   /**
    * 禁用指定字段的校验规则
    * @param {String} field 字段名
    * @param {Boolean} disable 是否禁用
    */
-  disableValidatorByField(field, disable) {
-    const validator = this.getValidatorByField(field);
+  disableFieldValidator(field, disable) {
+    const validator = this.getFieldValidator(field);
     if (validator) {
       validator.setDisable(disable);
-    }
-  }
-  /**
-   * 根据字段类型，禁用校验规则
-   * @param {String} vField 字段类型
-   * @param {Boolean} disable 是否禁用
-   */
-  disableValidatorByVField(vField, disable) {
-    const fieldValidator = this.getValidatorByVField(vField);
-    if (fieldValidator) {
-      fieldValidator.setDisable(disable);
     }
   }
   /**
@@ -54,22 +36,10 @@ class FormValidator {
    * @param {String|Number} rule 规则名称或者规则的序号
    * @param {Boolean} disable 是否禁用
    */
-  disableValidatorRuleByField(field, rule, disable) {
-    const validator = this.getValidatorByField(field);
+  disableFieldValidatorRule(field, rule, disable) {
+    const validator = this.getFieldValidator(field);
     if (validator) {
-      validator.setRuleDisable(disable);
-    }
-  }
-  /**
-   * 根据字段类型，禁用字段的指定校验规则
-   * @param {String} vField 字段类型
-   * @param {String|Number} rule 规则名称或者规则的序号
-   * @param {Boolean} disable 是否禁用
-   */
-  disableValidatorRuleByVField(vField, rule, disable) {
-    const fieldValidator = this.getValidatorByVField(vField);
-    if (fieldValidator) {
-      fieldValidator.setRuleDisable(disable);
+      validator.setRuleDisable(rule, disable);
     }
   }
   /**
@@ -77,16 +47,15 @@ class FormValidator {
    * @param {Object} payload 包含所有的 vFieldMap, fieldList
    * @param {Function} getState 获取完整State的方法
    */
-  async runAll(dispatch, getState, payload) {
-    const { formName, fieldValidateIns } = this;
+  async validate(dispatch, getState, payload) {
+    const { formName, fieldValidatorMap } = this;
     const state = getState();
     const { vFieldMap, fieldList } = payload;
-    let formData = formName ? state[formName] : state;
-    formData = formData || {};
-
+    const formData = (formName ? state[formName] : state) || {};
     const fieldResult = {};
     let formResult = true;
 
+    // 此处循环的fieldList是表单的fieldList，即一个表单有多少个输入字段
     for (const field of fieldList) {
       const vField = vFieldMap[field];
 
@@ -99,11 +68,17 @@ class FormValidator {
       };
       // 返回一个只能执行更新字段校验信息的dispatch方法
       const fieldValidateDispatch = dispatch(payload);
-      const result = await this.run(fieldValidateDispatch, getState, payload);
+
+      const result = await this.validateField(
+        fieldValidateDispatch,
+        getState,
+        payload
+      );
+
+      fieldResult[field] = result;
 
       formResult =
         formResult && (result ? result.validateStatus !== "error" : true);
-      fieldResult[field] = result;
     }
 
     return {
@@ -112,21 +87,21 @@ class FormValidator {
     };
   }
   /**
-   *
-   * @param {Object} payload 执行的上下文数据，包含field,vField字段,value
+   * 执行校验，
+   * @param {Function} dispatch 可以更新校验状态的回调方法
    * @param {Function} getState 获取完整State的方法
+   * @param {Object} payload 执行的上下文数据，包含field,vField字段,value
    */
-  async run(dispatch, getState, payload) {
+  async validateField(dispatch, getState, payload) {
     const { field, vField } = payload;
-    const fieldValidate =
-      this.getValidatorByField(field) ||
-      this.getValidatorByVField(vField);
+    const fieldValidator = vField
+      ? this.getFieldValidator(vField)
+      : this.getFieldValidator(field);
 
-    if (!fieldValidate) {
-      return null;
+    if (fieldValidator) {
+      return fieldValidator.run(dispatch, getState, payload);
     }
-
-    return fieldValidate.run(dispatch, getState, payload);
+    return null;
   }
 }
 

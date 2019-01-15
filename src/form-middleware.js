@@ -5,7 +5,9 @@ import {
   XFORM_VALIDATE,
   XFORM_FIELD_VALIDATE,
   XFORM_FIELD_VALIDATOR_DISABLE,
-  XFORM_FIELD_VALIDATOR_RULE_DISABLE
+  XFORM_FIELD_VALIDATOR_RULE_DISABLE,
+  XFORM_CLEAR_VALIDATE,
+  XFORM_CLEAR_FIELD_VALIDATE
 } from "./const";
 import { createFieldValuePayload } from "./data-util";
 import FormValidator from "./form-validator/index";
@@ -73,9 +75,14 @@ const FormMiddleware = store => next => async action => {
     case XFORM_VALIDATE: // 表单校验
       await formValidateMiddleware(dispatch, getState, action);
       break;
-    case XFORM_FIELD_VALIDATOR_DISABLE:
+
+    case XFORM_FIELD_VALIDATOR_DISABLE: // 禁用字段所有的校验规则
       break;
-    case XFORM_FIELD_VALIDATOR_RULE_DISABLE:
+    case XFORM_FIELD_VALIDATOR_RULE_DISABLE: // 禁用字段指定的校验规则
+      break;
+    case XFORM_CLEAR_VALIDATE: // 清除表单的校验状态
+      break;
+    case XFORM_CLEAR_FIELD_VALIDATE: // 清除表单指定字段的校验状态
       break;
   }
 };

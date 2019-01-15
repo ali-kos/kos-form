@@ -169,7 +169,7 @@ export const getRule = name => validatorsMap[name];
  */
 export const runRule = async (dispatch, getState, payload, rule) => {
   const { fn, data, disabled } = rule;
-  let { help = "" } = rule;
+  let { help = "校验错误！" } = rule;
   if (disabled || !fn) {
     return null;
   }
