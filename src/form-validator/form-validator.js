@@ -24,10 +24,10 @@ class FormValidator {
    * @param {String} field 字段名
    * @param {Boolean} disable 是否禁用
    */
-  disableFieldValidator(field, disable) {
+  disableFieldValidator(field, disabled = true) {
     const validator = this.getFieldValidator(field);
     if (validator) {
-      validator.setDisable(disable);
+      validator.setDisable(disabled);
     }
   }
   /**
@@ -36,10 +36,10 @@ class FormValidator {
    * @param {String|Number} rule 规则名称或者规则的序号
    * @param {Boolean} disable 是否禁用
    */
-  disableFieldValidatorRule(field, rule, disable) {
+  disableFieldValidatorRule(field, rule, disabled = true) {
     const validator = this.getFieldValidator(field);
     if (validator) {
-      validator.setRuleDisable(rule, disable);
+      validator.setRuleDisable(rule, disabled);
     }
   }
   /**
@@ -99,7 +99,7 @@ class FormValidator {
       : this.getFieldValidator(field);
 
     if (fieldValidator) {
-      return fieldValidator.run(dispatch, getState, payload);
+      return await fieldValidator.run(dispatch, getState, payload);
     }
     return null;
   }

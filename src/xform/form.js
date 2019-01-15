@@ -14,7 +14,9 @@ import {
   XFORM_VALIDATE,
   XFORM_FIELD_VALIDATE,
   XFORM_FIELD_VALIDATOR_DISABLE,
-  XFORM_FIELD_VALIDATOR_RULE_DISABLE
+  XFORM_FIELD_VALIDATOR_RULE_DISABLE,
+  XFORM_CLEAR_FIELD_VALIDATE,
+  XFORM_CLEAR_VALIDATE
 } from "../const";
 
 const formInsMap = {};
@@ -249,16 +251,17 @@ class Form extends React.Component {
   }
   clearValidate() {
     const { name: formName } = this.props;
+    const { fieldList, vFieldMap } = this;
     this.dispatch({
-      type: "",
-      payload: { formName }
+      type: XFORM_CLEAR_VALIDATE,
+      payload: { formName, fieldList, vFieldMap }
     });
   }
-  clearFieldValidate() {
+  clearFieldValidate(field) {
     const { name: formName } = this.props;
     this.dispatch({
-      type: "",
-      payload: { formName }
+      type: XFORM_CLEAR_FIELD_VALIDATE,
+      payload: { formName, field }
     });
   }
   onSubmit() {
@@ -272,10 +275,12 @@ class Form extends React.Component {
     return false;
   }
   registerField(field, vField) {
-    this.fieldList.push(field);
+    if (field) {
+      this.fieldList.push(field);
 
-    if (vField) {
-      this.vFieldMap[field] = vField;
+      if (vField) {
+        this.vFieldMap[field] = vField;
+      }
     }
   }
   revokeField(field) {

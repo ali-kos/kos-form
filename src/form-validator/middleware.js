@@ -139,15 +139,12 @@ export const formValidateMiddleware = async (dispatch, getState, action) => {
  */
 export const disableFieldValidatorMiddleware = (dispatch, getState, action) => {
   const { namespace, type } = KOSUtil.getActionType(action.type);
-  const { formName, field, disable } = action.payload;
+  const { formName, field, disabled } = action.payload;
   const model = KOS.getModel(namespace);
 
-  const validatorIns = getFormValidator(model, formName);
-  if (validatorIns) {
-    const formValidatorIns = validatorIns.getFormValidator(formName);
-    if (formValidatorIns && field) {
-      formValidatorIns.disableFieldValidator(field, disable);
-    }
+  const formValidatorIns = getFormValidator(model, formName);
+  if (formValidatorIns && field) {
+    formValidatorIns.disableFieldValidator(field, disabled);
   }
 };
 
@@ -163,14 +160,38 @@ export const disableFieldValidatorRuleMiddleware = (
   action
 ) => {
   const { namespace, type } = KOSUtil.getActionType(action.type);
-  const { formName, field, rule, disable } = action.payload;
+  const { formName, field, rule, disabled } = action.payload;
   const model = KOS.getModel(namespace);
 
-  const validatorIns = getFormValidator(model, formName);
-  if (validatorIns) {
-    const formValidatorIns = validatorIns.getFormValidator(formName);
-    if (formValidatorIns && field && rule) {
-      formValidatorIns.disableFieldValidatorRule(field, rule, disable);
-    }
+  const formValidatorIns = getFormValidator(model, formName);
+  if (formValidatorIns && field && rule) {
+    formValidatorIns.disableFieldValidatorRule(field, rule, disabled);
   }
+};
+
+export const clearFormValidateMiddleware = (dispatch, getState, action) => {
+  const { namespace, type } = KOSUtil.getActionType(action.type);
+  const { payload } = action;
+  const { formName, fieldList, vFieldMap } = payload;
+
+  const fieldValidateStatusDispatch = dispatchFieldValidate(dispatch, getState);
+  const result = {
+    validateStatus: "success",
+    hasFeedback: false
+  };
+
+  for (const field of fieldList) {
+    fieldValidateStatusDispatch({ formName, field }, result);
+  }
+};
+
+export const clearFieldValidateMiddleware = (dispatch, getState, action) => {
+  const { payload } = action;
+  const { formName, field } = payload;
+
+  const fieldValidateStatusDispatch = dispatchFieldValidate(dispatch, getState);
+  fieldValidateStatusDispatch(payload, {
+    validateStatus: "success",
+    hasFeedback: false
+  });
 };

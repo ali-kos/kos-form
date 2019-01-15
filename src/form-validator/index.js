@@ -1,6 +1,6 @@
 import Validator from "./validator";
 import * as ValidatorRule from "./validator-rule";
-import { fieldValidateMiddleware, formValidateMiddleware } from "./middleware";
+import * as ValidatorMiddleware from "./middleware";
 
 const { addRule } = ValidatorRule;
 
@@ -49,14 +49,6 @@ export default {
    * 校验器类
    */
   Validator,
-  /**
-   * 表单字段校验器中间件
-   */
-  fieldValidateMiddleware,
-  /**
-   * 表单校验器中间件
-   */
-  formValidateMiddleware,
-
+  ...ValidatorMiddleware,
   ...ValidatorRule
 };

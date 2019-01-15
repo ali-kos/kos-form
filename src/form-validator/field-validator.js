@@ -21,22 +21,22 @@ class FieldValidator {
    * 禁用字段校验器
    * @param {Boolean} disable 是否禁用
    */
-  setDisable(disable = true) {
-    this.disabled = disable;
+  setDisable(disabled = true) {
+    this.disabled = disabled;
   }
   /**
    * 禁用校验规则
    * @param {String|Number} rule 校验规则名称或者序号，需要不推荐使用
    * @param {Boolean} disabled 是否禁用
    */
-  setRuleDisable(rule, disabled) {
+  setRuleDisable(rule, disabled = true) {
     const isNumber = typeof rule === "number";
 
     this.rules.forEach((ruleItem, index) => {
       if (isNumber && index === rule) {
         ruleItem.disabled = disabled;
-      } else if (rule.name === rule) {
-        ruruleItemle.disabled = disabled;
+      } else if (ruleItem.name === rule) {
+        ruleItem.disabled = disabled;
       }
     });
   }
@@ -48,8 +48,16 @@ class FieldValidator {
    * @returns validateResult 校验结果：{validateStatus,hasFeedback,help}
    */
   async run(dispatch, getState, payload) {
-    let validateResult = null;
-    const { rules } = this;
+    const { successFeedback = false, successHelp = "" } = payload;
+    let validateResult = {
+      hasFeedback: successFeedback,
+      validateStatus: "success",
+      help: successHelp
+    };
+    const { rules, disabled } = this;
+    if (disabled) {
+      return validateResult;
+    }
     for (let i = 0, len = rules.length; i < len; i++) {
       const rule = rules[i];
 
@@ -57,9 +65,11 @@ class FieldValidator {
         const result = await runRule(dispatch, getState, payload, rule);
 
         // 遇到错误，立刻退出
-        if (result && result.validateStatus === "error") {
+        if (result) {
           validateResult = result;
-          break;
+          if (result.validateStatus === "error") {
+            break;
+          }
         }
       }
     }

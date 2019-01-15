@@ -14,7 +14,14 @@ import FormValidator from "./form-validator/index";
 import FieldDiaplay from "./field-display/index";
 
 const { fieldDisplayMiddleware } = FieldDiaplay;
-const { fieldValidateMiddleware, formValidateMiddleware } = FormValidator;
+const {
+  fieldValidateMiddleware,
+  formValidateMiddleware,
+  disableFieldValidatorMiddleware,
+  disableFieldValidatorRuleMiddleware,
+  clearFieldValidateMiddleware,
+  clearFormValidateMiddleware
+} = FormValidator;
 const KOSUtil = KOS.Util;
 
 const fieldChangeHandlers = [];
@@ -39,60 +46,26 @@ const FormMiddleware = store => next => async action => {
         type: "setState",
         payload: createFieldValuePayload(action.payload, getState)
       });
-
-      // fieldChangeHandlers.forEach(handler => {
-      //   handler(dispatch, getState, action);
-      // });
-      // 触发校验
-      // if (fieldValidateSeed) {
-      //   clearTimeout(fieldValidateSeed);
-      // }
-      // 转移至form.js里执行
-      // ((dispatch, payload) => {
-      //   fieldValidateSeed = setTimeout(() => {
-      //     console.log("run validate");
-      //     dispatch({
-      //       type: XFORM_FIELD_VALIDATE,
-      //       payload: payload
-      //     });
-      //   }, 300);
-      // })(dispatch, action.payload);
-
       break;
     case XFORM_FIELD_VALIDATE: // 字段校验
-      const { field, formName, callback } = action.payload;
-      const formData = getState()[formName] || {};
-
-      fieldValidateMiddleware(dispatch, getState, {
-        type: action.type,
-        payload: {
-          value: formData[field],
-          ...action.payload
-        }
-      });
-
+      fieldValidateMiddleware(dispatch, getState, action);
       break;
     case XFORM_VALIDATE: // 表单校验
       await formValidateMiddleware(dispatch, getState, action);
       break;
-
     case XFORM_FIELD_VALIDATOR_DISABLE: // 禁用字段所有的校验规则
+      disableFieldValidatorMiddleware(dispatch, getState, action);
       break;
     case XFORM_FIELD_VALIDATOR_RULE_DISABLE: // 禁用字段指定的校验规则
+      disableFieldValidatorRuleMiddleware(dispatch, getState, action);
       break;
     case XFORM_CLEAR_VALIDATE: // 清除表单的校验状态
+      clearFormValidateMiddleware(dispatch, getState, action);
       break;
     case XFORM_CLEAR_FIELD_VALIDATE: // 清除表单指定字段的校验状态
+      clearFieldValidateMiddleware(dispatch, getState, action);
       break;
   }
 };
-
-// FormMiddleware.addFieldChangeHandler = handler => {
-//   handler && fieldChangeHandlers.push(handler);
-// };
-
-// // 添加
-// FormMiddleware.addFieldChangeHandler(fieldDisplayMiddleware);
-// FormMiddleware.addFieldChangeHandler(fieldValidateMiddleware);
 
 export default FormMiddleware;
