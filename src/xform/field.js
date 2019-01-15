@@ -13,7 +13,7 @@ export default ({ FieldWrapper, FieldProps }) => {
     };
     static propTypes = {
       field: PropTypes.string,
-      fieldType: PropTypes.string,
+      vField: PropTypes.string,
       validator: PropTypes.any,
       getOnChangeValue: PropTypes.func
     };
@@ -23,12 +23,12 @@ export default ({ FieldWrapper, FieldProps }) => {
       this.state = {};
     }
     componentDidMount() {
-      const { fieldType, field } = this.props;
-      this.context && this.context.registerField(field, fieldType);
+      const { vField, field } = this.props;
+      this.context && this.context.registerField(field, vField);
     }
     componentWillUnmount() {
-      const { fieldType, field } = this.props;
-      this.context && this.context.revokeField(field, fieldType);
+      const { vField, field } = this.props;
+      this.context && this.context.revokeField(field, vField);
     }
     getFieldValue() {
       const { field } = this.props;
@@ -47,7 +47,7 @@ export default ({ FieldWrapper, FieldProps }) => {
     }
     onFieldChange(onChange) {
       return function(e) {
-        const { field, getOnChangeValue, fieldType } = this.props;
+        const { field, getOnChangeValue, vField } = this.props;
         const value = getOnChangeValue.apply(this, arguments);
 
         if (this.isOnComposition) {
@@ -66,7 +66,7 @@ export default ({ FieldWrapper, FieldProps }) => {
           }
 
           onChange && onChange.apply(this, arguments);
-          this.context.onFieldChange({ field, value, fieldType }, e);
+          this.context.onFieldChange({ field, value, vField }, e);
         }
       }.bind(this);
     }

@@ -174,7 +174,7 @@ export const runRule = async (dispatch, getState, payload, rule) => {
     return null;
   }
 
-  // const { field, value, fieldType, formName } = payload;
+  // const { field, value, vField, formName } = payload;
   /**
    * result有几种返回结果
    * 为undefined(包括fn无返回的情况)或者null，则表示校验规则执行失败，整体结果返回null

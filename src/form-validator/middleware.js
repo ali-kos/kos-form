@@ -133,7 +133,7 @@ export const formValidateMiddleware = async (dispatch, getState, action) => {
 
 export const fieldValidatorDisableMiddleware = (dispatch, getState, action) => {
   const { namespace, type } = KOSUtil.getActionType(action.type);
-  const { formName, field, fieldType, disable } = action.payload;
+  const { formName, field, vField, disable } = action.payload;
   const model = KOS.getModel(namespace);
 
   const validatorIns = getFormValidator(model, formName);
@@ -141,8 +141,8 @@ export const fieldValidatorDisableMiddleware = (dispatch, getState, action) => {
     const formValidatorIns = validatorIns.getFormValidator(formName);
     if (field) {
       formValidatorIns.disableValidatorByField(field, disable);
-    } else if (fieldType) {
-      formValidatorIns.disableValidatorByFieldType(field, disable);
+    } else if (vField) {
+      formValidatorIns.disableValidatorByVField(vField, disable);
     }
   }
 };
@@ -153,15 +153,15 @@ export const fieldValidatorRuleDisableMiddleware = (
   action
 ) => {
   const { namespace, type } = KOSUtil.getActionType(action.type);
-  const { formName, field, fieldType, rule, disable } = action.payload;
+  const { formName, field, vField, rule, disable } = action.payload;
 
   const validatorIns = getFormValidator(model, formName);
   if (validatorIns) {
     const formValidatorIns = validatorIns.getFormValidator(formName);
     if (field) {
       formValidatorIns.disableValidatorByField(field, disable);
-    } else if (fieldType) {
-      formValidatorIns.disableValidatorByFieldType(field, disable);
+    } else if (vField) {
+      formValidatorIns.disableValidatorByVField(field, disable);
     }
   }
 };

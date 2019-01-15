@@ -56,19 +56,6 @@ const getFormData = (namespace, formName) =>
 const resetForm = (namespace, formName) =>
   runFormMethod(namespace, formName, "reset");
 
-const isValidateSuccess = function(state, formName) {
-  const formValidateData = getFormValidateData(state, formName);
-  let result = true;
-  for (let field in formValidateData) {
-    const fieldValidateData = formValidateData[field];
-    if (result && fieldValidateData) {
-      result = fieldValidateData.status === "error";
-    }
-  }
-
-  return result;
-};
-
 class Form extends React.Component {
   static propTypes = {
     name: PropTypes.string.isRequired,
@@ -80,7 +67,7 @@ class Form extends React.Component {
     super(props);
 
     this.fieldList = [];
-    this.fieldTypeMap = {};
+    this.vFieldMap = {};
   }
 
   dispatch(action) {
@@ -118,14 +105,14 @@ class Form extends React.Component {
    * 字段值发生变化时触发
    * @param {String} field 字段名称，表单内不可重复
    * @param {String} value 值
-   * @param {String} fieldType 字段类型，表单内可重复
+   * @param {String} vField 字段类型，表单内可重复
    */
-  onFieldChange({ field, value, fieldType }) {
+  onFieldChange({ field, value, vField }) {
     const { name: formName } = this.props;
 
     const payload = {
       field,
-      fieldType,
+      vField,
       value,
       formName
     };
@@ -144,7 +131,7 @@ class Form extends React.Component {
     }, 400);
   }
 
-  onFieldFocus({ field, fieldType }) {}
+  onFieldFocus({ field, vField }) {}
   onFieldBlur() {}
   onFieldKeyUp() {}
   onFieldDown() {}
@@ -188,12 +175,12 @@ class Form extends React.Component {
    */
   validate(callback) {
     const { name: formName } = this.props;
-    const { fieldTypeMap, fieldList } = this;
+    const { vFieldMap, fieldList } = this;
     this.dispatch({
       type: XFORM_VALIDATE,
       payload: {
         formName,
-        fieldTypeMap,
+        vFieldMap,
         fieldList,
         callback
       }
@@ -214,7 +201,7 @@ class Form extends React.Component {
     } else {
       Object.assign(payload, {
         field,
-        fieldType: field
+        vField: field
       });
     }
 
@@ -268,11 +255,11 @@ class Form extends React.Component {
 
     return false;
   }
-  registerField(field, fieldType) {
+  registerField(field, vField) {
     this.fieldList.push(field);
 
-    if (fieldType) {
-      this.fieldTypeMap[field] = fieldType;
+    if (vField) {
+      this.vFieldMap[field] = vField;
     }
   }
   revokeField(field) {
@@ -281,7 +268,7 @@ class Form extends React.Component {
       this.fieldList.splice(index, 1);
     }
 
-    delete this.fieldTypeMap[field];
+    delete this.vFieldMap[field];
   }
   getChildContext() {
     return {
@@ -302,7 +289,6 @@ class Form extends React.Component {
 
     removeForm(namespace, formName);
   }
-
   render() {
     const { children } = this.props;
     return (
