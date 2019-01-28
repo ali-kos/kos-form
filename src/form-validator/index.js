@@ -14,7 +14,7 @@ addRule(
 
 addRule(
   "maxLength",
-  (dispatch, getState, { value, field, maxLength: data }) => {
+  (dispatch, getState, { value, field, data: maxLength }) => {
     if (value) {
       return value.length <= maxLength;
     }
@@ -24,22 +24,59 @@ addRule(
 
 addRule(
   "minLength",
-  (dispatch, getState, { value, field, minLength: data }) => {
+  (dispatch, getState, { value, field, data: minLength }) => {
     if (value) {
       return value.length >= minLength;
     }
     return true;
   }
 );
+addRule(
+  "rangeLength",
+  (dispatch, getState, { value, field, data: rangeLength }) => {
+    const [minLength, maxLength] = range;
+    if (value) {
+      const len = value.length;
+      return minLength <= len && len <= maxLength;
+    }
+    return true;
+  }
+);
+addRule(
+  "rangeLength",
+  (dispatch, getState, { value, field, data: rangeLength }) => {
+    const [minLength, maxLength] = range;
+    if (value) {
+      const len = value.length;
+      return minLength <= len && len <= maxLength;
+    }
+    return true;
+  }
+);
 
-addRule("regexp", (dispatch, getState, { value, field, regExp: data }) => {
-  return regExp.test(value);
+addRule("min", (dispatch, getState, { value, field, data: min }) => {
+  return value >= min;
+});
+addRule("max", (dispatch, getState, { value, field, data: max }) => {
+  return value <= max;
+});
+addRule("range", (dispatch, getState, { value, field, data: range }) => {
+  const [min, max] = range;
+  return !value || (min <= value && value <= max);
+});
+
+addRule("regexp", (dispatch, getState, { value, field, data: regExp }) => {
+  return !value || regExp.test(value);
+});
+
+addRule("chinese", (dispatch, getState, { value, field }) => {
+  return !value || /^[\u4e00-\u9fa5],{0,}$/.test(value);
 });
 
 addRule(
   "email",
   (dispatch, getState, { value, field, data }) => {
-    return /[a-z0-9-]{1,30}@[a-z0-9-]{1,65}.[a-z]{3}/.test(value);
+    return !value || /[a-z0-9-]{1,30}@[a-z0-9-]{1,65}.[a-z]{3}/.test(value);
   },
   "请输入正确的email地址"
 );

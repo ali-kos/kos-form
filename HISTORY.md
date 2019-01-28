@@ -47,7 +47,13 @@
 - 提供禁用字段校验规则的能力
 - 提供禁用字段指定校验规则的能力
 
-## v2.0.0
+## v2.1.0
 
-- `Form.prototype.validateField` 第一个参数调整为支持String和Object
-- 新增email校验规则
+- `Form.prototype.validateField` 第一个参数调整为支持 String 和 Object
+- 新增 email 校验规则
+
+## v2.2.0
+
+- 修复 minLength,maxLength,reg 校验规则的 bug；
+- 新增 min,max,range,rangeLength 校验规则
+- 新增中文校验规则
