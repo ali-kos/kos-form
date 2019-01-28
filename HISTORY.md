@@ -57,3 +57,9 @@
 - 修复 minLength,maxLength,reg 校验规则的 bug；
 - 新增 min,max,range,rangeLength 校验规则
 - 新增中文校验规则
+
+
+## v2.2.1
+
+- 修复 rangeLengt的bug
+- 修复 chinese的bug

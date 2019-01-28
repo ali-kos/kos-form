@@ -34,18 +34,7 @@ addRule(
 addRule(
   "rangeLength",
   (dispatch, getState, { value, field, data: rangeLength }) => {
-    const [minLength, maxLength] = range;
-    if (value) {
-      const len = value.length;
-      return minLength <= len && len <= maxLength;
-    }
-    return true;
-  }
-);
-addRule(
-  "rangeLength",
-  (dispatch, getState, { value, field, data: rangeLength }) => {
-    const [minLength, maxLength] = range;
+    const [minLength, maxLength] = rangeLength;
     if (value) {
       const len = value.length;
       return minLength <= len && len <= maxLength;
@@ -70,7 +59,7 @@ addRule("regexp", (dispatch, getState, { value, field, data: regExp }) => {
 });
 
 addRule("chinese", (dispatch, getState, { value, field }) => {
-  return !value || /^[\u4e00-\u9fa5],{0,}$/.test(value);
+  return /^[\u4e00-\u9fa5]*$/.test(value);
 });
 
 addRule(
