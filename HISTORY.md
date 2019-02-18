@@ -63,3 +63,8 @@
 
 - 修复 rangeLengt的bug
 - 修复 chinese的bug
+
+
+## v2.2.2
+
+- 修复 没有配置validators的bug
