@@ -57,7 +57,7 @@ export default ({ FieldWrapper, FieldProps }) => {
           });
         } else {
           // 是input，记录input的光标的位置
-          if (e.target instanceof HTMLInputElement) {
+          if (e && e.target instanceof HTMLInputElement) {
             this.inputSelection = {
               start: e.target.selectionStart,
               end: e.target.selectionEnd

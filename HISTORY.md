@@ -68,3 +68,9 @@
 ## v2.2.2
 
 - 修复 没有配置validators的bug
+
+
+## v2.2.3
+
+- 兼容部分自定义组件手动触发组件的onChange事件，且不带参数的情况，例如antd的InputNumber组件在onBlur的时候，会手动触发onChange
+
