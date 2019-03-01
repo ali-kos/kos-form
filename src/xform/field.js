@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 export default ({ FieldWrapper, FieldProps }) => {
   class Field extends React.PureComponent {
     static defaultProps = {
-      valueProp: "value", // 默认是value属性，如switch等，支持checheck属性
+      valuePropName: "value", // 默认是value属性，如switch等，支持checheck属性
       getOnChangeValue: e => {
         if (e && e.target) {
           return e.target.value;
@@ -12,12 +12,11 @@ export default ({ FieldWrapper, FieldProps }) => {
         return e;
       }
     };
-    static defaultProps = {};
     static propTypes = {
       field: PropTypes.string,
       vField: PropTypes.string,
       validator: PropTypes.any,
-      valueProp: PropTypes.string,
+      valuePropName: PropTypes.string,
       getOnChangeValue: PropTypes.func
     };
     constructor(props) {
@@ -119,7 +118,7 @@ export default ({ FieldWrapper, FieldProps }) => {
         return null;
       }
 
-      const { children } = this.props;
+      const { children, valuePropName } = this.props;
       const validateData = this.getValidateData();
 
       const fieldProps = {
@@ -145,7 +144,7 @@ export default ({ FieldWrapper, FieldProps }) => {
             // const onFieldChange = this.onFieldChange(onChange);
             const props = {
               ...child.props,
-              value,
+              [valuePropName]: value,
               onChange: this.onFieldChange(onChange),
               // onFocus: this.onFieldFocus(onFocus),
               // onBlur: this.onFieldBlur(onBlur),
