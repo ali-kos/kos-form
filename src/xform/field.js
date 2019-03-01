@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 export default ({ FieldWrapper, FieldProps }) => {
   class Field extends React.PureComponent {
     static defaultProps = {
+      valueProp: "value", // 默认是value属性，如switch等，支持checheck属性
       getOnChangeValue: e => {
         if (e && e.target) {
           return e.target.value;
@@ -11,10 +12,12 @@ export default ({ FieldWrapper, FieldProps }) => {
         return e;
       }
     };
+    static defaultProps = {};
     static propTypes = {
       field: PropTypes.string,
       vField: PropTypes.string,
       validator: PropTypes.any,
+      valueProp: PropTypes.string,
       getOnChangeValue: PropTypes.func
     };
     constructor(props) {

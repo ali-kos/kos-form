@@ -74,3 +74,7 @@
 
 - 兼容部分自定义组件手动触发组件的onChange事件，且不带参数的情况，例如antd的InputNumber组件在onBlur的时候，会手动触发onChange
 
+
+## v2.3.0
+
+- Field组件提供valueProp属性，坚决Field兼容非value属性表示值的组件的问题，如Switch等组件
