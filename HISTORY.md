@@ -78,3 +78,8 @@
 ## v2.3.0
 
 - Field组件提供valueProp属性，坚决Field兼容非value属性表示值的组件的问题，如Switch等组件
+
+
+## v2.3.1
+
+- 修复Textarea元素输入过程中光标定位问题

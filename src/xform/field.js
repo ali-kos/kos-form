@@ -1,6 +1,16 @@
 import React from "react";
 import PropTypes from "prop-types";
 
+const isInputElement = target => {
+  return (
+    target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement
+  );
+};
+
+const isInputEvent = e => {
+  return e && isInputElement(e.target);
+};
+
 export default ({ FieldWrapper, FieldProps }) => {
   class Field extends React.PureComponent {
     static defaultProps = {
@@ -59,7 +69,7 @@ export default ({ FieldWrapper, FieldProps }) => {
           });
         } else {
           // 是input，记录input的光标的位置
-          if (e && e.target instanceof HTMLInputElement) {
+          if (isInputEvent(e)) {
             this.inputSelection = {
               start: e.target.selectionStart,
               end: e.target.selectionEnd
@@ -82,7 +92,7 @@ export default ({ FieldWrapper, FieldProps }) => {
           break;
         case "end":
           this.isOnComposition = false;
-          if (e.target instanceof HTMLInputElement && !this.isOnComposition) {
+          if (isInputEvent(e) && !this.isOnComposition) {
             this.onFieldChange(onChange)(e);
           }
           break;
@@ -98,7 +108,7 @@ export default ({ FieldWrapper, FieldProps }) => {
     onFieldBlur(onBlur) {}
     componentDidUpdate(prevProps) {
       // const { value } = prevProps;
-      const value = this.getFieldValue();
+      const value = this.getFieldValue() || "";
       const { inputSelection, inputTarget } = this;
       if (inputSelection && inputTarget) {
         // 在 didUpdate 时根据情况恢复光标的位置
