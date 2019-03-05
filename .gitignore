@@ -25,3 +25,4 @@ lib
 **/runtime.js
 yarn*
 **/frame/index.js
+package-lock.json
