@@ -1,4 +1,4 @@
-import $ from "lodash";
+import $ from "../lib/util";
 
 const formatStr = (str, data) => {
   data = [].concat(data);

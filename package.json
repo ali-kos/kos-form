@@ -1,6 +1,6 @@
 {
   "name": "kos-form",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "keywords": [
     "kos",
     "kos-core",
@@ -22,7 +22,6 @@
   "module": "lib/index.es.js",
   "dependencies": {
     "babel-runtime": "^6.26.0",
-    "lodash": "^4.17.5",
     "prop-types": "^15.6.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",

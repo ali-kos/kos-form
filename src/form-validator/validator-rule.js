@@ -1,4 +1,4 @@
-import $ from "lodash";
+import $ from "../lib/util";
 import { getValidateHelp } from "./validator-help";
 
 /**
