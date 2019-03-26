@@ -89,3 +89,9 @@
 ## v2.3.2
 
 - 清理loadsh依赖
+
+
+
+## v2.3.3
+
+- 修复Util.isFunction判断的bug
