@@ -15,6 +15,7 @@ export default ({ FieldWrapper, FieldProps }) => {
   class Field extends React.PureComponent {
     static defaultProps = {
       valuePropName: "value", // 默认是value属性，如switch等，支持checheck属性
+      required: false,
       getOnChangeValue: e => {
         if (e && e.target) {
           return e.target.value;
@@ -26,6 +27,7 @@ export default ({ FieldWrapper, FieldProps }) => {
       field: PropTypes.string,
       vField: PropTypes.string,
       validator: PropTypes.any,
+      required: PropTypes.bool,
       valuePropName: PropTypes.string,
       getOnChangeValue: PropTypes.func
     };
@@ -58,7 +60,7 @@ export default ({ FieldWrapper, FieldProps }) => {
       return this.context.getFieldDisplayData(field) === false ? false : true;
     }
     onFieldChange(onChange) {
-      return function(e) {
+      return e => {
         const { field, getOnChangeValue, vField } = this.props;
         const value = getOnChangeValue.apply(this, arguments);
 
@@ -80,7 +82,7 @@ export default ({ FieldWrapper, FieldProps }) => {
           onChange && onChange.apply(this, arguments);
           this.context.onFieldChange({ field, value, vField }, e);
         }
-      }.bind(this);
+      };
     }
     onCompositionHandler(type, onChange, e) {
       switch (type) {
@@ -128,13 +130,14 @@ export default ({ FieldWrapper, FieldProps }) => {
         return null;
       }
 
-      const { children, valuePropName } = this.props;
+      const { children, valuePropName, required, validator } = this.props;
       const validateData = this.getValidateData();
 
       const fieldProps = {
         ...FieldProps,
         ...this.props,
-        ...validateData
+        ...validateData,
+        required
       };
 
       const { onCompositionHandler } = this;

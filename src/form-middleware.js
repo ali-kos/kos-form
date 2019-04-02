@@ -24,7 +24,7 @@ const {
 } = FormValidator;
 const KOSUtil = KOS.Util;
 
-const fieldChangeHandlers = [];
+// const fieldChangeHandlers = [];
 // let fieldValidateSeed = null;
 const FormMiddleware = store => next => async action => {
   const { namespace, type } = KOSUtil.getActionType(action.type);
