@@ -1,7 +1,20 @@
 import { parseValidatorRules, runRule } from "./validator-rule";
 
+const getDSLFieldValidatorRules = (field, required, validator) => {
+  const rules = [].concat(validator);
+  if (required) {
+    rules.push("required");
+  }
+  const exRules = parseValidatorRules({
+    field,
+    rules
+  });
+
+  return exRules;
+};
+
 class FieldValidator {
-  constructor(field, rules) {
+  constructor(field, rules = []) {
     this.field = field;
     this.disabled = false;
     this.initRules(rules);
@@ -48,31 +61,44 @@ class FieldValidator {
    * @returns validateResult 校验结果：{validateStatus,hasFeedback,help}
    */
   async run(dispatch, getState, payload) {
-    const { successFeedback = false, successHelp = "" } = payload;
-    let validateResult = {
-      hasFeedback: successFeedback,
-      validateStatus: "success",
-      help: successHelp
-    };
-    const { rules, disabled } = this;
-    if (disabled) {
+    const {
+      // successFeedback = false,
+      // successHelp = "",
+      validator = [],
+      required
+    } = payload;
+
+    const { disabled, field, rules } = this;
+
+    // 执行在dsl里配置的校验规则
+    // let dslRules = getDSLFieldValidatorRules(field, required, validator);
+    let validateResult = await FieldValidator.dslRun(
+      dispatch,
+      getState,
+      payload
+    );
+    if (validateResult.validateStatus === "error") {
       return validateResult;
     }
-    for (let i = 0, len = rules.length; i < len; i++) {
-      const rule = rules[i];
+    // if (dslRules.length) {
+    //   validateResult = await FieldValidator.run(dispatch, getState, {
+    //     ...payload,
+    //     rules: dslRules,
+    //     disabled
+    //   });
 
-      if (rule && rule.fn && !rule.disabled) {
-        const result = await runRule(dispatch, getState, payload, rule);
+    //   if (validateResult.validateStatus === "error") {
+    //     return validateResult;
+    //   }
+    // }
 
-        // 遇到错误，立刻退出
-        if (result) {
-          validateResult = result;
-          if (result.validateStatus === "error") {
-            break;
-          }
-        }
-      }
-    }
+    // 执行在model里配置的校验规则
+    validateResult = await FieldValidator.run(dispatch, getState, {
+      ...payload,
+      rules,
+      field,
+      disabled
+    });
 
     return validateResult;
   }
@@ -98,6 +124,53 @@ FieldValidator.factory = validators => {
   }
 
   return vas;
+};
+
+FieldValidator.run = async (dispatch, getState, payload) => {
+  const {
+    successFeedback = false,
+    successHelp = "",
+    disabled,
+    rules = []
+  } = payload;
+
+  let validateResult = {
+    hasFeedback: successFeedback,
+    validateStatus: "success",
+    help: successHelp
+  };
+
+  if (disabled) {
+    return validateResult;
+  }
+
+  for (let i = 0, len = rules.length; i < len; i++) {
+    const rule = rules[i];
+
+    if (rule && rule.fn && !rule.disabled) {
+      const result = await runRule(dispatch, getState, payload, rule);
+
+      // 遇到错误，立刻退出
+      if (result) {
+        validateResult = result;
+        if (result.validateStatus === "error") {
+          break;
+        }
+      }
+    }
+  }
+
+  return validateResult;
+};
+
+FieldValidator.dslRun = async (dispatch, getState, payload) => {
+  const { field, required, validator } = payload;
+  let dslRules = getDSLFieldValidatorRules(field, required, validator);
+
+  return await FieldValidator.run(dispatch, getState, {
+    ...payload,
+    rules: dslRules
+  });
 };
 
 export default FieldValidator;

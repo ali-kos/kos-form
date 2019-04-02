@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import Util from "../lib/util";
 
 const isInputElement = target => {
   return (
@@ -34,15 +35,27 @@ export default ({ FieldWrapper, FieldProps }) => {
     constructor(props) {
       super(props);
 
+      this.key = Util.randomId();
       this.state = {};
     }
     componentDidMount() {
-      const { vField, field } = this.props;
-      this.context && this.context.registerField(field, vField);
+      const { context = {}, key, props } = this;
+      const { registerField } = context;
+      if (registerField) {
+        registerField({
+          key,
+          ...props
+        });
+      } else {
+        console.warn("Field needs Form Parents!");
+      }
     }
     componentWillUnmount() {
-      const { vField, field } = this.props;
-      this.context && this.context.revokeField(field, vField);
+      const { context = {}, key } = this;
+      const { revokeField } = context;
+      if (revokeField) {
+        revokeField(key);
+      }
     }
     getFieldValue() {
       const { field } = this.props;
@@ -60,8 +73,14 @@ export default ({ FieldWrapper, FieldProps }) => {
       return this.context.getFieldDisplayData(field) === false ? false : true;
     }
     onFieldChange(onChange) {
-      return e => {
-        const { field, getOnChangeValue, vField } = this.props;
+      return function(e) {
+        const {
+          field,
+          getOnChangeValue,
+          vField = field, // vField就是默认的校验字段，默认为field
+          required,
+          validator
+        } = this.props;
         const value = getOnChangeValue.apply(this, arguments);
 
         if (this.isOnComposition) {
@@ -80,9 +99,12 @@ export default ({ FieldWrapper, FieldProps }) => {
           }
 
           onChange && onChange.apply(this, arguments);
-          this.context.onFieldChange({ field, value, vField }, e);
+          this.context.onFieldChange(
+            { field, value, vField, required, validator },
+            e
+          );
         }
-      };
+      }.bind(this);
     }
     onCompositionHandler(type, onChange, e) {
       switch (type) {
@@ -130,7 +152,7 @@ export default ({ FieldWrapper, FieldProps }) => {
         return null;
       }
 
-      const { children, valuePropName, required, validator } = this.props;
+      const { children, valuePropName, required } = this.props;
       const validateData = this.getValidateData();
 
       const fieldProps = {

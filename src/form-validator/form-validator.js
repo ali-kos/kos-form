@@ -44,27 +44,29 @@ class FormValidator {
   }
   /**
    * 执行所有的校验，并返回校验结果
-   * @param {Object} payload 包含所有的 vFieldMap, fieldList
+   * @param {Object} payload 包含所有的 fieldList;
    * @param {Function} getState 获取完整State的方法
    */
   async validate(dispatch, getState, payload) {
     const { formName, fieldValidatorMap } = this;
     const state = getState();
-    const { vFieldMap, fieldList } = payload;
+    const { fieldList } = payload;
     const formData = (formName ? state[formName] : state) || {};
     const fieldResult = {};
     let formResult = true;
 
     // 此处循环的fieldList是表单的fieldList，即一个表单有多少个输入字段
-    for (const field of fieldList) {
-      const vField = vFieldMap[field];
+    for (const fieldProps of fieldList) {
+      const { field, vField = field, required, validator } = fieldProps;
 
       const value = formData[field];
       const payload = {
         field,
         vField,
         value,
-        formName
+        formName,
+        required,
+        validator
       };
       // 返回一个只能执行更新字段校验信息的dispatch方法
       const fieldValidateDispatch = dispatch(payload);
@@ -93,15 +95,12 @@ class FormValidator {
    * @param {Object} payload 执行的上下文数据，包含field,vField字段,value
    */
   async validateField(dispatch, getState, payload) {
-    const { field, vField } = payload;
-    const fieldValidator = vField
-      ? this.getFieldValidator(vField)
-      : this.getFieldValidator(field);
+    const { field, vField = field } = payload;
+    // 此处将vField作为默认获取校验规则的key
+    const fieldValidator =
+      this.getFieldValidator(vField) || new FieldValidator(field);
 
-    if (fieldValidator) {
-      return await fieldValidator.run(dispatch, getState, payload);
-    }
-    return null;
+    return await fieldValidator.run(dispatch, getState, payload);
   }
 }
 

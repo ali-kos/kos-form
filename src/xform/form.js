@@ -69,7 +69,6 @@ class Form extends React.Component {
     super(props);
 
     this.fieldList = [];
-    this.vFieldMap = {};
   }
 
   dispatch(action) {
@@ -109,15 +108,18 @@ class Form extends React.Component {
    * @param {String} value 值
    * @param {String} vField 字段类型，表单内可重复
    */
-  onFieldChange({ field, value, vField }) {
+  onFieldChange({ field, value, vField, required, validator }) {
     const { name: formName } = this.props;
 
     const payload = {
       field,
       vField,
       value,
-      formName
+      formName,
+      required,
+      validator
     };
+
     // 受控组件：传递值
     this.dispatch({
       type: XFORM_FIELD_CHANGE,
@@ -177,12 +179,11 @@ class Form extends React.Component {
    */
   validate(callback) {
     const { name: formName } = this.props;
-    const { vFieldMap, fieldList } = this;
+    const { fieldList } = this;
     this.dispatch({
       type: XFORM_VALIDATE,
       payload: {
         formName,
-        vFieldMap,
         fieldList,
         callback
       }
@@ -196,8 +197,10 @@ class Form extends React.Component {
   validateField(field, callback) {
     const payload = {
       value: this.getFieldValue(field),
-      formName: this.props.name
+      formName: this.props.name,
+      callback
     };
+
     if (typeof field === "object") {
       Object.assign(payload, field);
     } else {
@@ -209,10 +212,7 @@ class Form extends React.Component {
 
     this.dispatch({
       type: XFORM_FIELD_VALIDATE,
-      payload: {
-        ...payload,
-        callback
-      }
+      payload
     });
   }
   /**
@@ -251,10 +251,11 @@ class Form extends React.Component {
   }
   clearValidate() {
     const { name: formName } = this.props;
-    const { fieldList, vFieldMap } = this;
+    const { fieldList } = this;
+
     this.dispatch({
       type: XFORM_CLEAR_VALIDATE,
-      payload: { formName, fieldList, vFieldMap }
+      payload: { formName, fieldList }
     });
   }
   clearFieldValidate(field) {
@@ -274,22 +275,25 @@ class Form extends React.Component {
 
     return false;
   }
-  registerField(field, vField) {
-    if (field) {
-      this.fieldList.push(field);
-
-      if (vField) {
-        this.vFieldMap[field] = vField;
-      }
-    }
+  registerField(fieldProps) {
+    // 此处保存所有的Props
+    this.fieldList.push(fieldProps);
   }
-  revokeField(field) {
-    const index = this.fieldList.indexOf(field);
-    if (index > -1) {
+  revokeField(key) {
+    const { fieldList } = this;
+    let index = 0;
+    const len = fieldList.length;
+
+    while (index < len) {
+      const fieldProps = fieldList[index];
+      if (key === fieldProps.key) {
+        break;
+      }
+      index++;
+    }
+    if (index < len) {
       this.fieldList.splice(index, 1);
     }
-
-    delete this.vFieldMap[field];
   }
   getChildContext() {
     return {

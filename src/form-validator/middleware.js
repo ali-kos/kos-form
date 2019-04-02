@@ -65,7 +65,7 @@ export const fieldValidateMiddleware = async (dispatch, getState, action) => {
   const { namespace, type } = KOSUtil.getActionType(action.type);
   const model = KOS.getModel(namespace);
   const { payload } = action;
-  const { formName, field } = payload;
+  const { formName, field, vField, required, validator } = payload;
 
   let result = null;
 
@@ -172,7 +172,7 @@ export const disableFieldValidatorRuleMiddleware = (
 export const clearFormValidateMiddleware = (dispatch, getState, action) => {
   const { namespace, type } = KOSUtil.getActionType(action.type);
   const { payload } = action;
-  const { formName, fieldList, vFieldMap } = payload;
+  const { formName, fieldList } = payload;
 
   const fieldValidateStatusDispatch = dispatchFieldValidate(dispatch, getState);
   const result = {
@@ -180,7 +180,8 @@ export const clearFormValidateMiddleware = (dispatch, getState, action) => {
     hasFeedback: false
   };
 
-  for (const field of fieldList) {
+  for (const fieldProps of fieldList) {
+    const { field } = fieldProps;
     fieldValidateStatusDispatch({ formName, field }, result);
   }
 };

@@ -43,14 +43,14 @@ import FormValidator from "./form-validator";
  */
 
 class Validator {
-  constructor(validators) {
+  constructor(validators = []) {
     this.validators = validators;
     this.formValidator = {};
     this.init();
   }
   init() {
     const map = {};
-    const { validators=[], formValidator } = this;
+    const { validators, formValidator } = this;
 
     // 第一层遍历formName，同一个formName可以写多个{formName,validators}的配置
     validators.forEach(item => {

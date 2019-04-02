@@ -120,6 +120,10 @@ export const parseRule = (rule, custHelp) => {
  * }
  */
 export const parseValidatorRules = fieldValidator => {
+  if(!fieldValidator){
+    return [];
+  }
+  
   const { field, help } = fieldValidator;
   let list = [];
   const rules = [].concat(fieldValidator.rules);
