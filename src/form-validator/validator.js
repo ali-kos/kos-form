@@ -72,7 +72,12 @@ class Validator {
    * @param {String} formName 表单名称
    */
   getFormValidator(formName) {
-    return this.formValidator[formName];
+    const fv = this.formValidator[formName];
+    if (!fv) {
+      fv = new FormValidator([], formName);
+      this.formValidator[formName] = fv;
+    }
+    return fv;
   }
 }
 

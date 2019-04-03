@@ -91,7 +91,13 @@
 - 清理loadsh依赖
 
 
-
 ## v2.3.3
 
 - 修复Util.isFunction判断的bug
+
+
+## v2.4.0
+
+- feat: 提供Field的required属性
+- feat: 提供Field的validator属性
+- chore: 部分逻辑重构
