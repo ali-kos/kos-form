@@ -105,3 +105,9 @@
 ## v2.4.1
 
 - bugfix: 解决dsl配置校验规则的bug
+
+
+## v2.4.2
+
+- feat: 提供FormHOC能力
+
