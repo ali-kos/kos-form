@@ -101,3 +101,7 @@
 - feat: 提供Field的required属性
 - feat: 提供Field的validator属性
 - chore: 部分逻辑重构
+
+## v2.4.1
+
+- bugfix: 解决dsl配置校验规则的bug
