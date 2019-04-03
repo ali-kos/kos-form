@@ -44,19 +44,19 @@ class FormValidator {
   }
   /**
    * 执行所有的校验，并返回校验结果
-   * @param {Object} payload 包含所有的 fieldList;
+   * @param {Object} payload 包含所有的 fieldPropsList;
    * @param {Function} getState 获取完整State的方法
    */
   async validate(dispatch, getState, payload) {
     const { formName, fieldValidatorMap } = this;
     const state = getState();
-    const { fieldList } = payload;
+    const { fieldPropsList } = payload;
     const formData = (formName ? state[formName] : state) || {};
     const fieldResult = {};
     let formResult = true;
 
-    // 此处循环的fieldList是表单的fieldList，即一个表单有多少个输入字段
-    for (const fieldProps of fieldList) {
+    // 此处循环的fieldPropsList是表单的fieldPropsList，即一个表单有多少个输入字段
+    for (const fieldProps of fieldPropsList) {
       const { field, vField = field, required, validator } = fieldProps;
 
       const value = formData[field];

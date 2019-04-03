@@ -174,17 +174,22 @@ class Form extends React.Component {
     const formData = this.getData();
     return formData[field];
   }
+  getFieldPropsList() {
+    return this.fieldList.map(fieldComponent => fieldComponent.props);
+  }
   /**
    * 执行全表单校验
    */
   validate(callback) {
     const { name: formName } = this.props;
     const { fieldList } = this;
+
+    const fieldPropsList = this.getFieldPropsList();
     this.dispatch({
       type: XFORM_VALIDATE,
       payload: {
         formName,
-        fieldList,
+        fieldPropsList,
         callback
       }
     });
@@ -251,11 +256,11 @@ class Form extends React.Component {
   }
   clearValidate() {
     const { name: formName } = this.props;
-    const { fieldList } = this;
+    const fieldPropsList = this.getFieldPropsList();
 
     this.dispatch({
       type: XFORM_CLEAR_VALIDATE,
-      payload: { formName, fieldList }
+      payload: { formName, fieldPropsList }
     });
   }
   clearFieldValidate(field) {
@@ -275,9 +280,9 @@ class Form extends React.Component {
 
     return false;
   }
-  registerField(fieldProps) {
+  registerField(fieldComponent) {
     // 此处保存所有的Props
-    this.fieldList.push(fieldProps);
+    this.fieldList.push(fieldComponent);
   }
   revokeField(key) {
     const { fieldList } = this;

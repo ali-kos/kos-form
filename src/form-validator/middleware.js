@@ -172,7 +172,7 @@ export const disableFieldValidatorRuleMiddleware = (
 export const clearFormValidateMiddleware = (dispatch, getState, action) => {
   const { namespace, type } = KOSUtil.getActionType(action.type);
   const { payload } = action;
-  const { formName, fieldList } = payload;
+  const { formName, fieldPropsList } = payload;
 
   const fieldValidateStatusDispatch = dispatchFieldValidate(dispatch, getState);
   const result = {
@@ -180,7 +180,7 @@ export const clearFormValidateMiddleware = (dispatch, getState, action) => {
     hasFeedback: false
   };
 
-  for (const fieldProps of fieldList) {
+  for (const fieldProps of fieldPropsList) {
     const { field } = fieldProps;
     fieldValidateStatusDispatch({ formName, field }, result);
   }

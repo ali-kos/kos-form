@@ -42,10 +42,7 @@ export default ({ FieldWrapper, FieldProps }) => {
       const { context = {}, key, props } = this;
       const { registerField } = context;
       if (registerField) {
-        registerField({
-          key,
-          ...props
-        });
+        registerField(this);
       } else {
         console.warn("Field needs Form Parents!");
       }
