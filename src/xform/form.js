@@ -58,7 +58,7 @@ const getFormData = (namespace, formName) =>
 const resetForm = (namespace, formName) =>
   runFormMethod(namespace, formName, "reset");
 
-export default (FormWrapper = 'form') => {
+export default (FormWrapper = "form") => {
   class Form extends React.Component {
     static propTypes = {
       name: PropTypes.string.isRequired,
@@ -183,8 +183,6 @@ export default (FormWrapper = 'form') => {
      */
     validate(callback) {
       const { name: formName } = this.props;
-      const { fieldList } = this;
-
       const fieldPropsList = this.getFieldPropsList();
       this.dispatch({
         type: XFORM_VALIDATE,
@@ -282,24 +280,43 @@ export default (FormWrapper = 'form') => {
       return false;
     }
     registerField(fieldComponent) {
-      // 此处保存所有的Props
-      this.fieldList.push(fieldComponent);
+      if (!fieldComponent) {
+        return;
+      }
+      const { key } = fieldComponent;
+      const index = this.getFieldComponentIndex(key);
+      if (index === -1) {
+        this.fieldList.push(fieldComponent);
+      } else {
+        this.fieldList[index] = fieldComponent;
+      }
     }
     revokeField(key) {
-      const { fieldList } = this;
-      let index = 0;
-      const len = fieldList.length;
-
-      while (index < len) {
-        const fieldProps = fieldList[index];
-        if (key === fieldProps.key) {
-          break;
-        }
-        index++;
-      }
-      if (index < len) {
+      const index = this.getFieldComponentIndex(key);
+      if (index !== -1) {
         this.fieldList.splice(index, 1);
       }
+    }
+    eachFieldList(callback) {
+      const { fieldList } = this;
+      for (let i = 0, len = fieldList.length; i < len; i++) {
+        const fieldComponent = fieldList[i];
+
+        if (callback(fieldComponent, i) === false) {
+          break;
+        }
+      }
+    }
+    getFieldComponentIndex(key) {
+      let fIndex = -1;
+      this.eachFieldList((fieldComponent, index) => {
+        const ret = fieldComponent.key === key;
+        if (ret) {
+          fIndex = index;
+          return false;
+        }
+      });
+      return fIndex;
     }
     getChildContext() {
       return {

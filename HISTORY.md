@@ -110,4 +110,5 @@
 ## v2.4.2
 
 - feat: 提供FormHOC能力
+- chore: 优化组件注册
 

@@ -39,7 +39,16 @@ export default ({ FieldWrapper, FieldProps }) => {
       this.state = {};
     }
     componentDidMount() {
-      const { context = {}, key, props } = this;
+      this.registerField();
+    }
+    componentWillUnmount() {
+      this.revokeField();
+    }
+    componentDidUpdate() {
+      this.registerField();
+    }
+    registerField(){
+      const { context = {} } = this;
       const { registerField } = context;
       if (registerField) {
         registerField(this);
@@ -47,7 +56,7 @@ export default ({ FieldWrapper, FieldProps }) => {
         console.warn("Field needs Form Parents!");
       }
     }
-    componentWillUnmount() {
+    revokeField(){
       const { context = {}, key } = this;
       const { revokeField } = context;
       if (revokeField) {
