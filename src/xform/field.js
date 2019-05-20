@@ -13,7 +13,7 @@ const isInputEvent = e => {
 };
 
 export default ({ FieldWrapper, FieldProps }) => {
-  class Field extends React.PureComponent {
+  class Field extends React.Component {
     static defaultProps = {
       valuePropName: "value", // 默认是value属性，如switch等，支持checheck属性
       required: false,

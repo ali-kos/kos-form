@@ -112,3 +112,9 @@
 - feat: 提供FormHOC能力
 - chore: 优化组件注册
 
+
+## v2.5.0
+
+- feat: 提供Form的scope能力，解决namespace依赖context的问题（默认仍然依赖context
+- chore: 优化组件状态数据的获取，kos-core升级到v2.4.0，Model实例提供getState方法
+

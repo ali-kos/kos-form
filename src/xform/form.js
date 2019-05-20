@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import KOS from "kos-core";
+import kos from "kos-core";
 
 import {
   getFieldValidateData,
@@ -21,9 +21,13 @@ import {
 
 const formInsMap = {};
 const addForm = ins => {
-  const namespace = ins.context.getNamespace();
+  const namespace = ins.getNamespace();
   const formName = ins.props.name;
 
+  // 判断当前namespace下是否已经存在这个表单
+  // if (formInsMap[`${namespace}/${formName}`]) {
+  //   throw new Error("There is an form name ${formName} in ${namespace} Model");
+  // }
   formInsMap[`${namespace}/${formName}`] = ins;
 };
 const removeForm = (namespace, formName) => {
@@ -51,8 +55,6 @@ const validate = (namespace, formName, callback) => {
   }
 };
 
-const setFormData = (namespace, formName) =>
-  runFormMethod(namespace, formName, "setData");
 const getFormData = (namespace, formName) =>
   runFormMethod(namespace, formName, "getData");
 const resetForm = (namespace, formName) =>
@@ -63,7 +65,12 @@ export default (FormWrapper = "form") => {
     static propTypes = {
       name: PropTypes.string.isRequired,
       onSubmit: PropTypes.func,
-      dispatch: PropTypes.func
+      dispatch: PropTypes.func,
+      scope: PropTypes.string // 需要挂在的Model的namespace
+    };
+
+    static defaultProps = {
+      scope: ""
     };
 
     constructor(props) {
@@ -71,19 +78,44 @@ export default (FormWrapper = "form") => {
 
       this.fieldList = [];
     }
-
+    getNamespace() {
+      return this.props.scope || this.context.getNamespace();
+    }
+    getModel() {
+      const namespace = this.getNamespace();
+      return kos.getModel(namespace);
+    }
+    /**
+     * 触发action方法，进行namespace的自动补全
+     * @param {Action} action 触发的action
+     */
     dispatch(action) {
       const dispatch = this.props.dispatch || this.context.dispatch;
-
-      dispatch && dispatch(action);
-    }
-    getState() {
-      const { getState } = this.context;
-      if (getState) {
-        return getState();
+      let { type } = action;
+      const namespace = this.getNamespace();
+      if (type.indexOf("/") === -1) {
+        type = `${namespace}/${type}`;
       }
 
-      return this.props;
+      const newAction = {
+        ...action,
+        type
+      };
+
+      dispatch && dispatch(newAction);
+    }
+    getState() {
+      const Model = this.getModel();
+      return Model.getState();
+    }
+    /**
+     * 获取表单值
+     */
+    getData() {
+      const { name: formName } = this.props;
+      const state = this.getState();
+
+      return state[formName] || {};
     }
     /**
      * 根据字段名称，获取字段的展示数据
@@ -137,22 +169,12 @@ export default (FormWrapper = "form") => {
     }
 
     onFieldFocus({ field, vField }) {}
-    onFieldBlur() {}
-    onFieldKeyUp() {}
-    onFieldDown() {}
-    /**
-     * 获取表单值
-     */
-    getData() {
-      const { name: formName } = this.props;
-      const state = this.getState();
-
-      return state[formName] || {};
-    }
+    onFieldBlur(field, vField) {}
+    onFieldKeyUp(field, vField) {}
+    onFieldDown(field, vField) {}
     reset() {
-      const namespace = this.context.getNamespace();
       const { name: formName } = this.props;
-      const Model = KOS.getModel(namespace);
+      const Model = this.getModel();
 
       const initialModel = Model.getInitial();
       this.setData(initialModel[formName]);
@@ -332,7 +354,7 @@ export default (FormWrapper = "form") => {
       addForm(this);
     }
     componentWillUnmount() {
-      const namespace = this.context.getNamespace();
+      const namespace = this.getNamespace();
       const { name: formName } = this.props;
 
       removeForm(namespace, formName);
@@ -375,7 +397,7 @@ export default (FormWrapper = "form") => {
   Form.resetForm = resetForm;
   Form.validate = validate;
 
-  KOS.wrapperProps({
+  kos.wrapperProps({
     getForm(formName) {
       const namespace = this.getNamespace();
 
